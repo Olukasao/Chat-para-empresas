@@ -1,0 +1,398 @@
+.calculator {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(14, 165, 233, 0.14), rgba(34, 197, 94, 0.08)),
+    rgba(15, 23, 42, 0.96);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.26);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.headerIcon {
+  width: 54px;
+  height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 8px;
+  background: rgba(14, 165, 233, 0.16);
+  color: #7dd3fc;
+}
+
+.header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.42rem;
+  line-height: 1.2;
+}
+
+.header p {
+  margin: 4px 0 0;
+  color: #bae6fd;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.field {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  color: #dbeafe;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.inputWithIcon,
+.currencyInput {
+  min-height: 46px;
+  display: grid;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.42);
+  overflow: hidden;
+}
+
+.inputWithIcon {
+  position: relative;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.currencyInput {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.inputWithIcon:focus-within,
+.currencyInput:focus-within {
+  border-color: rgba(125, 211, 252, 0.72);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+}
+
+.calendarButton,
+.currencyInput strong {
+  color: #7dd3fc;
+  flex: 0 0 auto;
+}
+
+.calendarButton {
+  width: 44px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(14, 165, 233, 0.08);
+  cursor: pointer;
+}
+
+.calendarButton:hover,
+.calendarButton:focus-visible {
+  background: rgba(14, 165, 233, 0.18);
+  color: #bae6fd;
+  outline: none;
+}
+
+.currencyInput strong {
+  padding-left: 13px;
+  font-size: 0.86rem;
+}
+
+.inputWithIcon input,
+.currencyInput input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f8fafc;
+  font: inherit;
+  font-weight: 800;
+  padding: 0 13px;
+}
+
+.currencyInput input {
+  padding-left: 9px;
+}
+
+.nativeDatePicker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 46px;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.inputWithIcon input::placeholder,
+.currencyInput input::placeholder {
+  color: rgba(203, 213, 225, 0.58);
+}
+
+.fieldError {
+  color: #fecaca;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.primaryButton {
+  border: 0;
+  background: #22c55e;
+  color: #0f172a;
+}
+
+.primaryButton:hover:not(:disabled),
+.primaryButton:focus-visible:not(:disabled) {
+  background: #16a34a;
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+.secondaryButton {
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: rgba(2, 6, 23, 0.38);
+  color: #dbeafe;
+}
+
+.secondaryButton:hover,
+.secondaryButton:focus-visible {
+  border-color: rgba(125, 211, 252, 0.52);
+  background: rgba(14, 165, 233, 0.14);
+}
+
+.validationMessage,
+.emptyState {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: 8px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.validationMessage {
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.3);
+  color: #fecaca;
+}
+
+.emptyState {
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  background: rgba(14, 165, 233, 0.08);
+  color: #dbeafe;
+}
+
+.resultPanel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.28);
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #67e8f9;
+}
+
+.resultHeader h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.planCard {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.planCard > span {
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.planCard > strong {
+  color: #ffffff;
+  font-size: 1.32rem;
+  line-height: 1.15;
+}
+
+.planCard p,
+.planCard small {
+  margin: 0;
+  color: #bae6fd;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.planCard small {
+  color: #94a3b8;
+}
+
+.proportionalLine {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.proportionalLine span {
+  color: #dbeafe;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.proportionalLine strong {
+  color: #67e8f9;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.invoiceHighlight {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(20, 184, 166, 0.12)),
+    rgba(20, 83, 45, 0.24);
+  text-align: center;
+}
+
+.invoiceHighlight span {
+  color: #bbf7d0;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.invoiceHighlight strong {
+  color: #ffffff;
+  font-size: clamp(2rem, 5vw, 2.7rem);
+  line-height: 1.05;
+}
+
+@media (max-width: 760px) {
+  .form,
+  .planGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 560px) {
+  .calculator {
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .header {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .headerIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .header h2 {
+    font-size: 1.22rem;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .resultPanel {
+    padding: 14px;
+  }
+}

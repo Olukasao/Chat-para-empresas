@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg-main: #06152b;
+  --bg-panel: #071b38;
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --border-soft: rgba(255, 255, 255, 0.10);
+  --accent: #00d4ff;
+  --accent-strong: #0077ff;
+  --danger: #ff4d4d;
+  --success: #22c55e;
+}
+
+:root[data-theme='escuro'],
+body[data-theme='escuro'],
+:root[data-theme='dark'],
+body[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-main: #06152b;
+  --bg-panel: #071b38;
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --border-soft: rgba(255, 255, 255, 0.10);
+  --accent: #00d4ff;
+  --accent-strong: #0077ff;
+  --danger: #ff4d4d;
+  --success: #22c55e;
+}
+
+:root[data-theme='claro'],
+body[data-theme='claro'],
+:root[data-theme='light'],
+body[data-theme='light'] {
+  color-scheme: light;
+  --bg-main: #f3f7fb;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #102033;
+  --text-secondary: #5d6b7a;
+  --border-soft: rgba(16, 32, 51, 0.12);
+  --accent: #0077ff;
+  --accent-strong: #0057cc;
+  --danger: #dc2626;
+  --success: #16a34a;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+body.copa-theme,
+body.themeWorldCup2026 {
+  position: relative;
+  background: radial-gradient(circle at top left, #00502c 0%, #003b1f 30%, #001713 100%);
+  color: #f8f8f2;
+  --copa-green: #009B3A;
+  --copa-dark-green: #003B1F;
+  --copa-yellow: #FFDF00;
+  --copa-blue: #002776;
+  --copa-light-blue: #00D4FF;
+  --copa-white: #FFFFFF;
+  --primary-color: var(--copa-dark-green);
+  --secondary-color: var(--copa-white);
+  --accent-color: var(--copa-yellow);
+  --bg-primary: #003b1f;
+  --bg-secondary: #002b17;
+  --bg-dark: #00120e;
+  --text-primary: #f8f8f2;
+  --text-secondary: rgba(248, 248, 242, 0.78);
+  --border-color: rgba(255, 223, 0, 0.18);
+  --message-sent: #0f8d43;
+  --message-received: #003422;
+  --online: #ffdf00;
+  --away: #00d4ff;
+  --offline: #94a3b8;
+  --unread-color: #ffd800;
+  --unread-color-dark: #ffb700;
+  transition: background 0.4s ease, color 0.3s ease;
+  background-image:
+    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.08), transparent 16%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.05), transparent 11%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 38%, transparent 62%, rgba(255, 255, 255, 0.03) 100%);
+  background-blend-mode: overlay;
+}
+
+body.copa-theme::before,
+body.themeWorldCup2026::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 14%, rgba(255, 255, 255, 0.12), transparent 12%),
+    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.08), transparent 10%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, transparent 20%, transparent 80%, rgba(255, 255, 255, 0.03) 100%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 15%, transparent 85%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0.52;
+  z-index: -1;
+}
+
+body.copa-theme .chatViewport,
+body.themeWorldCup2026 .chatViewport {
+  background: radial-gradient(circle at top left, rgba(0, 155, 58, 0.26), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(0, 80, 40, 0.30), transparent 30%),
+    linear-gradient(180deg, #003b1f 0%, #00130c 100%);
+}
+
+body.copa-theme ::placeholder,
+body.themeWorldCup2026 ::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+body.copa-theme button,
+body.copa-theme input,
+body.copa-theme textarea,
+body.copa-theme select,
+body.themeWorldCup2026 button,
+body.themeWorldCup2026 input,
+body.themeWorldCup2026 textarea,
+body.themeWorldCup2026 select {
+  color: #f8fafc;
+}
+
+body.copa-theme button:hover,
+body.copa-theme .iconButton:hover,
+body.copa-theme .themeCupButton:hover,
+body.themeWorldCup2026 button:hover,
+body.themeWorldCup2026 .iconButton:hover,
+body.themeWorldCup2026 .themeCupButton:hover {
+  background: rgba(255, 223, 0, 0.18);
+}
+
+body.copa-theme .iconButton.activeAction,
+body.copa-theme .themeCupButton.activeAction,
+body.themeWorldCup2026 .iconButton.activeAction,
+body.themeWorldCup2026 .themeCupButton.activeAction {
+  background: #ffdf00;
+  color: #041924;
+}
+
+body.copa-theme .chat-home-hero-bar,
+body.themeWorldCup2026 .chat-home-hero-bar {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 223, 0, 0.28);
+  background: linear-gradient(180deg, rgba(0, 131, 60, 0.95), rgba(0, 71, 30, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+body.copa-theme .chat-home-hero-bar::before,
+body.themeWorldCup2026 .chat-home-hero-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 30%, rgba(255, 255, 255, 0.08), transparent 10%),
+    radial-gradient(circle at 90% 22%, rgba(255, 255, 255, 0.06), transparent 8%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 22%, transparent 78%, rgba(255, 255, 255, 0.04) 100%);
+}
+
+body.copa-theme .chat-home-shortcut-card,
+body.themeWorldCup2026 .chat-home-shortcut-card {
+  background: linear-gradient(180deg, rgba(0, 53, 21, 0.92), rgba(0, 34, 15, 0.95));
+  border: 1px solid rgba(255, 223, 0, 0.2);
+  color: #f8f8f2;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+body.copa-theme .chat-home-shortcut-card:hover,
+body.themeWorldCup2026 .chat-home-shortcut-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 223, 0, 0.42);
+  box-shadow: 0 22px 38px rgba(0, 0, 0, 0.26), 0 0 0 1px rgba(255, 223, 0, 0.08);
+}
+
+body.copa-theme .chat-home-shortcut-icon,
+body.themeWorldCup2026 .chat-home-shortcut-icon {
+  color: var(--copa-yellow);
+}
+
+body.copa-theme .chat-home-hero-title,
+body.themeWorldCup2026 .chat-home-hero-title {
+  color: #ffffff;
+}
+
+body.copa-theme .chat-home-mini-card,
+body.themeWorldCup2026 .chat-home-mini-card {
+  background: radial-gradient(circle at top left, rgba(0, 155, 58, 0.14), transparent 42%),
+    rgba(2, 23, 20, 0.88);
+}
+
+body[data-theme='claro'] {
+  background: var(--bg-main);
+  color: var(--text-primary);
+}

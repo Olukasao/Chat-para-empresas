@@ -1,0 +1,646 @@
+.avisos-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding: 34px;
+  background: #020814;
+  color: #eaf7ff;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.avisos-preview-surface {
+  min-height: auto;
+  overflow: visible;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.avisos-background-glow {
+  position: absolute;
+  top: -260px;
+  right: -180px;
+  width: 760px;
+  height: 760px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 174, 255, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+.avisos-header,
+.avisos-summary-grid,
+.avisos-content,
+.avisos-state {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.avisos-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 28px;
+  border: 1px solid rgba(90, 190, 255, 0.18);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(10, 29, 52, 0.86), rgba(4, 12, 25, 0.9));
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.35);
+}
+
+.avisos-header-actions {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.avisos-header-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(90, 190, 255, 0.22);
+  border-radius: 6px;
+  padding: 9px 12px;
+  background: rgba(0, 174, 255, 0.08);
+  color: #58c8ff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.avisos-header-button:hover {
+  background: rgba(0, 174, 255, 0.16);
+}
+
+.avisos-header-button-admin {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+  color: #8ff8ce;
+}
+
+.avisos-logo {
+  width: 130px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(0, 174, 255, 0.28));
+}
+
+.avisos-header-text {
+  max-width: 720px;
+  padding-right: 150px;
+}
+
+.avisos-kicker {
+  display: inline-flex;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(0, 174, 255, 0.12);
+  color: #58c8ff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.avisos-title {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.avisos-subtitle {
+  margin: 12px 0 0;
+  color: #9fb3c8;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.avisos-state {
+  margin-bottom: 18px;
+  border: 1px solid rgba(90, 190, 255, 0.16);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: rgba(8, 22, 40, 0.84);
+  color: #c5d5e5;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.avisos-state-warning {
+  border-color: rgba(251, 191, 36, 0.28);
+  background: rgba(120, 53, 15, 0.25);
+  color: #fde68a;
+}
+
+.avisos-floating-state {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 20;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100vw - 28px));
+  border: 1px solid rgba(90, 190, 255, 0.22);
+  border-radius: 8px;
+  padding: 11px 14px;
+  background: rgba(8, 22, 40, 0.94);
+  color: #c5d5e5;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.avisos-floating-state-warning {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(120, 53, 15, 0.94);
+  color: #fde68a;
+}
+
+.avisos-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.avisos-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  border: 1px solid rgba(90, 190, 255, 0.14);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(8, 22, 40, 0.78);
+}
+
+.avisos-summary-card strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.avisos-summary-card p {
+  margin: 3px 0 0;
+  color: #90a7bd;
+  font-size: 13px;
+}
+
+.avisos-summary-icon,
+.avisos-notice-icon,
+.avisos-wiki-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 174, 255, 0.1);
+}
+
+.avisos-summary-icon {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 22px;
+}
+
+.avisos-content {
+  display: grid;
+  grid-template-columns: 1.35fr 0.9fr;
+  gap: 24px;
+}
+
+.avisos-left-column,
+.avisos-wiki-card {
+  border: 1px solid rgba(90, 190, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(5, 14, 28, 0.72);
+}
+
+.avisos-left-column {
+  padding: 22px;
+}
+
+.avisos-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.avisos-section-header,
+.avisos-section-header-simple {
+  margin-bottom: 16px;
+}
+
+.avisos-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.avisos-section-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.avisos-section-subtitle {
+  margin: 6px 0 0;
+  color: #8fa8c0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.avisos-notice-list,
+.avisos-wiki-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.avisos-empty {
+  border: 1px dashed rgba(90, 190, 255, 0.18);
+  border-radius: 8px;
+  padding: 16px;
+  color: #8fa8c0;
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.avisos-notice-card {
+  display: flex;
+  gap: 16px;
+  border: 1px solid rgba(90, 190, 255, 0.13);
+  border-radius: 8px;
+  padding: 18px;
+  background: linear-gradient(145deg, rgba(12, 30, 52, 0.82), rgba(4, 12, 24, 0.82));
+}
+
+.avisos-notice-icon {
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  font-size: 24px;
+}
+
+.avisos-notice-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.avisos-notice-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.avisos-notice-type {
+  color: #58c8ff;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.avisos-notice-date {
+  color: #6f859a;
+  font-size: 12px;
+}
+
+.avisos-notice-title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.avisos-notice-description {
+  margin: 8px 0 12px;
+  color: #a8bdd2;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.avisos-notice-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.avisos-notice-author {
+  margin-left: auto;
+  color: #6f859a;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: right;
+}
+
+.avisos-status-badge,
+.avisos-goal-badge {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(0, 174, 255, 0.1);
+  color: #58c8ff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.avisos-goal-card {
+  border: 1px solid rgba(90, 190, 255, 0.18);
+  border-radius: 8px;
+  padding: 24px;
+  background: linear-gradient(145deg, rgba(0, 90, 140, 0.25), rgba(4, 12, 24, 0.88));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+}
+
+.avisos-goal-badge {
+  padding: 6px 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.avisos-goal-title {
+  margin: 18px 0 10px;
+  font-size: 28px;
+  line-height: 1.12;
+}
+
+.avisos-goal-text {
+  margin: 0;
+  color: #a8bdd2;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.avisos-progress-box {
+  margin-top: 22px;
+}
+
+.avisos-progress-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+  color: #c5d5e5;
+  font-size: 13px;
+}
+
+.avisos-progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.avisos-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0ea5e9, #22c5ff);
+  box-shadow: 0 0 18px rgba(0, 174, 255, 0.45);
+}
+
+.avisos-goal-reset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 16px;
+  border: 1px solid rgba(248, 113, 113, 0.36);
+  border-radius: 8px;
+  padding: 11px 14px;
+  background: rgba(127, 29, 29, 0.18);
+  color: #fecaca;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.avisos-goal-reset-button:hover:not(:disabled) {
+  border-color: rgba(248, 113, 113, 0.58);
+  background: rgba(127, 29, 29, 0.28);
+}
+
+.avisos-goal-reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.avisos-wiki-card {
+  padding: 22px;
+}
+
+.avisos-wiki-item {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid rgba(90, 190, 255, 0.12);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: inherit;
+  text-align: left;
+}
+
+.avisos-wiki-item strong {
+  display: block;
+  color: #eaf7ff;
+  font-size: 14px;
+}
+
+.avisos-wiki-item p {
+  margin: 4px 0 5px;
+  color: #a8bdd2;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.avisos-wiki-item small {
+  color: #58c8ff;
+  font-weight: 800;
+}
+
+.avisos-wiki-icon {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+@media (max-width: 980px) {
+  .avisos-page {
+    padding: 22px;
+  }
+
+  .avisos-header,
+  .avisos-content {
+    grid-template-columns: 1fr;
+  }
+
+  .avisos-header {
+    align-items: flex-start;
+    padding-top: 68px;
+  }
+
+  .avisos-header-text {
+    padding-right: 0;
+  }
+
+  .avisos-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .avisos-content {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .avisos-page {
+    padding: 14px;
+  }
+
+  .avisos-header {
+    flex-direction: column;
+    gap: 18px;
+    padding: 72px 18px 20px;
+  }
+
+  .avisos-header-actions {
+    left: 18px;
+    right: 18px;
+    justify-content: space-between;
+  }
+
+  .avisos-header-button {
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .avisos-logo {
+    width: 112px;
+  }
+
+  .avisos-title {
+    font-size: 30px;
+  }
+
+  .avisos-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .avisos-notice-card,
+  .avisos-wiki-item {
+    align-items: flex-start;
+  }
+
+  .avisos-notice-top {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .avisos-notice-footer {
+    flex-wrap: wrap;
+  }
+
+  .avisos-notice-author {
+    width: 100%;
+  }
+}
+
+[data-theme='claro'] .avisos-page {
+  background:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 38%),
+    linear-gradient(135deg, #eef7fb 0%, #f8fafc 52%, #eefcfb 100%);
+  color: #0f172a;
+}
+
+[data-theme='claro'] .avisos-background-glow {
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.12), transparent 68%);
+}
+
+[data-theme='claro'] .avisos-header,
+[data-theme='claro'] .avisos-summary-card,
+[data-theme='claro'] .avisos-left-column,
+[data-theme='claro'] .avisos-wiki-card,
+[data-theme='claro'] .avisos-notice-card,
+[data-theme='claro'] .avisos-goal-card {
+  border-color: rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.09);
+}
+
+[data-theme='claro'] .avisos-header {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(240, 249, 255, 0.88));
+}
+
+[data-theme='claro'] .avisos-header-button,
+[data-theme='claro'] .avisos-empty,
+[data-theme='claro'] .avisos-wiki-item {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  color: #0369a1;
+}
+
+[data-theme='claro'] .avisos-header-button-admin {
+  border-color: rgba(13, 148, 136, 0.26);
+  background: rgba(20, 184, 166, 0.1);
+  color: #0f766e;
+}
+
+[data-theme='claro'] .avisos-title,
+[data-theme='claro'] .avisos-section-title,
+[data-theme='claro'] .avisos-goal-title,
+[data-theme='claro'] .avisos-notice-title,
+[data-theme='claro'] .avisos-summary-card strong,
+[data-theme='claro'] .avisos-wiki-item strong {
+  color: #0f172a;
+}
+
+[data-theme='claro'] .avisos-subtitle,
+[data-theme='claro'] .avisos-section-subtitle,
+[data-theme='claro'] .avisos-summary-card p,
+[data-theme='claro'] .avisos-notice-description,
+[data-theme='claro'] .avisos-goal-text,
+[data-theme='claro'] .avisos-progress-info,
+[data-theme='claro'] .avisos-wiki-item p,
+[data-theme='claro'] .avisos-notice-date {
+  color: #64748b;
+}
+
+[data-theme='claro'] .avisos-notice-author {
+  color: #94a3b8;
+}
+
+[data-theme='claro'] .avisos-state,
+[data-theme='claro'] .avisos-floating-state {
+  border-color: rgba(14, 165, 233, 0.18);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0369a1;
+}
+
+[data-theme='claro'] .avisos-floating-state-success {
+  border-color: rgba(22, 163, 74, 0.22);
+  color: #15803d;
+}
+
+[data-theme='claro'] .avisos-goal-reset-button {
+  border-color: rgba(220, 38, 38, 0.18);
+  background: rgba(254, 242, 242, 0.86);
+  color: #b91c1c;
+}

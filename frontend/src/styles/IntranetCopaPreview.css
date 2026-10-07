@@ -1,0 +1,1753 @@
+.cupPreview,
+.cupPreview * {
+  box-sizing: border-box;
+}
+
+.cupPreview {
+  --cup-bg: #020b16;
+  --cup-panel: #061423;
+  --cup-panel-2: #071b2a;
+  --cup-card: rgba(7, 25, 40, 0.92);
+  --cup-cyan: #18bfff;
+  --cup-cyan-bright: #00d4ff;
+  --cup-green: #39d353;
+  --cup-green-soft: #50c878;
+  --cup-yellow: #ffd21f;
+  --cup-yellow-deep: #f6c400;
+  --cup-red: #ff4d43;
+  --cup-text: #ffffff;
+  --cup-muted: #9cafc3;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  color: var(--cup-text);
+  background:
+    radial-gradient(circle at 73% 9%, rgba(24, 191, 255, 0.08), transparent 24%),
+    radial-gradient(circle at 48% 94%, rgba(57, 211, 83, 0.05), transparent 28%),
+    linear-gradient(145deg, #020914 0%, #04111e 55%, #020a13 100%);
+  font-family: Inter, Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.cupPreview button,
+.cupPreview input {
+  font: inherit;
+}
+
+.cupPreview button {
+  color: inherit;
+}
+
+.cupPageGlow {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.cupPageGlow--one {
+  width: 520px;
+  height: 240px;
+  left: 32%;
+  top: -170px;
+  background: rgba(0, 212, 255, 0.09);
+}
+
+.cupPageGlow--two {
+  width: 380px;
+  height: 220px;
+  right: 4%;
+  bottom: -170px;
+  background: rgba(57, 211, 83, 0.07);
+}
+
+.cupSidebar {
+  width: 300px;
+  min-width: 300px;
+  height: 100vh;
+  position: relative;
+  z-index: 20;
+  padding: 10px 0 10px 10px;
+}
+
+.cupSidebarPanel {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(24, 191, 255, 0.13);
+  border-right-color: rgba(57, 211, 83, 0.14);
+  border-radius: 22px 18px 18px 22px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(24, 191, 255, 0.08), transparent 21%),
+    linear-gradient(180deg, rgba(7, 24, 39, 0.98), rgba(3, 13, 24, 0.99));
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.36),
+    inset -1px 0 rgba(57, 211, 83, 0.04);
+}
+
+.cupSidebarPanel::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 96px;
+  pointer-events: none;
+  opacity: 0.18;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 28px, rgba(57, 211, 83, 0.08) 29px 30px),
+    linear-gradient(180deg, transparent, rgba(57, 211, 83, 0.07));
+}
+
+.cupSidebarBrand {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 17px 11px;
+}
+
+.cupBrandTrophy {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 210, 31, 0.25);
+  border-radius: 14px;
+  color: var(--cup-yellow);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.16), transparent 28%),
+    rgba(255, 210, 31, 0.08);
+  box-shadow: 0 0 24px rgba(255, 210, 31, 0.08);
+}
+
+.cupBrandWords {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.cupBrandWords strong {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.cupBrandWords small {
+  margin-top: 5px;
+  color: var(--cup-green);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.27em;
+}
+
+.cupBrandActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cupBrandActions button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(156, 175, 195, 0.12);
+  border-radius: 9px;
+  color: #9fb5ca;
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+}
+
+.cupBrandActions button:hover {
+  color: var(--cup-yellow);
+  border-color: rgba(255, 210, 31, 0.25);
+  background: rgba(255, 210, 31, 0.06);
+}
+
+.cupTinyBall,
+.cupHeadingBall {
+  position: relative;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 48%, #07111a 0 16%, transparent 17%),
+    conic-gradient(from 15deg, #fff 0 16%, #9aabb9 17% 19%, #fff 20% 36%, #9aabb9 37% 39%, #fff 40% 56%, #9aabb9 57% 59%, #fff 60% 76%, #9aabb9 77% 79%, #fff 80%);
+  box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.22);
+}
+
+.cupTinyBall {
+  width: 22px;
+  height: 22px;
+}
+
+.cupSidebarSearch {
+  height: 39px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 14px 12px;
+  padding: 0 11px;
+  border: 1px solid rgba(24, 191, 255, 0.16);
+  border-radius: 11px;
+  color: #748da4;
+  background: rgba(11, 31, 48, 0.78);
+  box-shadow: inset 0 1px 7px rgba(0, 0, 0, 0.18);
+}
+
+.cupSidebarSearch:focus-within {
+  border-color: rgba(57, 211, 83, 0.42);
+  box-shadow: 0 0 0 3px rgba(57, 211, 83, 0.06);
+}
+
+.cupSidebarSearch input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: #dce9f5;
+  background: transparent;
+  font-size: 11px;
+}
+
+.cupSidebarSearch input::placeholder {
+  color: #678096;
+}
+
+.cupSidebarTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0 14px 11px;
+  padding: 4px;
+  border: 1px solid rgba(156, 175, 195, 0.08);
+  border-radius: 11px;
+  background: rgba(1, 10, 20, 0.56);
+}
+
+.cupSidebarTabs button {
+  min-height: 31px;
+  border: 0;
+  border-radius: 8px;
+  color: #7f95a9;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.cupSidebarTabs button.is-active {
+  color: #fff;
+  background: linear-gradient(135deg, #1eac4f, #087b42);
+  box-shadow: 0 7px 16px rgba(14, 139, 69, 0.22);
+}
+
+.cupSidebarScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 12px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(57, 211, 83, 0.2) transparent;
+}
+
+.cupSidebarSectionHeading {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 7px;
+  color: #71879b;
+  text-transform: uppercase;
+}
+
+.cupSidebarSectionHeading--restricted {
+  margin-top: 9px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(156, 175, 195, 0.08);
+}
+
+.cupSidebarSectionHeading strong {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.cupSidebarSectionHeading span {
+  min-width: 20px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: #7fb899;
+  background: rgba(57, 211, 83, 0.08);
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.cupGroupList {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cupGroupItem,
+.cupRestrictedItem {
+  width: 100%;
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.cupGroupItem:hover,
+.cupRestrictedItem:hover {
+  transform: translateX(2px);
+  border-color: rgba(24, 191, 255, 0.12);
+  background: rgba(16, 42, 62, 0.64);
+}
+
+.cupGroupIcon,
+.cupRestrictedLock {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.cupGroupIcon--yellow {
+  color: var(--cup-yellow);
+  background: rgba(255, 210, 31, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 31, 0.13);
+}
+
+.cupGroupIcon--cyan {
+  color: var(--cup-cyan-bright);
+  background: rgba(0, 212, 255, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(0, 212, 255, 0.13);
+}
+
+.cupGroupIcon--green {
+  color: var(--cup-green);
+  background: rgba(57, 211, 83, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(57, 211, 83, 0.13);
+}
+
+.cupGroupIcon--blue {
+  color: #55a7ff;
+  background: rgba(55, 135, 230, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(73, 154, 246, 0.13);
+}
+
+.cupGroupCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cupGroupCopy strong {
+  overflow: hidden;
+  color: #dce9f5;
+  font-size: 10px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupGroupCopy small {
+  overflow: hidden;
+  margin-top: 4px;
+  color: #61798f;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupGroupItem time {
+  align-self: start;
+  margin-top: 4px;
+  color: #5e7487;
+  font-size: 7px;
+}
+
+.cupRestrictedLock {
+  width: 33px;
+  height: 33px;
+  color: #52697d;
+  background: rgba(71, 93, 112, 0.1);
+}
+
+.cupRestrictedBadge {
+  padding: 4px 6px;
+  border: 1px solid rgba(57, 211, 83, 0.2);
+  border-radius: 999px;
+  color: #52ce78;
+  background: rgba(57, 211, 83, 0.07);
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cupSidebarEmpty {
+  padding: 17px 8px;
+  color: #60768a;
+  font-size: 9px;
+  text-align: center;
+}
+
+.cupSidebarUser {
+  min-height: 66px;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 39px minmax(0, 1fr) 32px 26px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 10px 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(24, 191, 255, 0.1);
+  border-radius: 13px;
+  background: rgba(11, 28, 43, 0.92);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.13);
+}
+
+.cupUserAvatar {
+  width: 39px;
+  height: 39px;
+  position: relative;
+  overflow: visible;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(57, 211, 83, 0.48);
+  border-radius: 50%;
+  color: #07151f;
+  background: linear-gradient(145deg, #ffd21f, #39d353);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.cupUserAvatar img {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cupUserAvatar i {
+  width: 9px;
+  height: 9px;
+  position: absolute;
+  right: -1px;
+  bottom: 1px;
+  border: 2px solid #081827;
+  border-radius: 50%;
+  background: var(--cup-green);
+}
+
+.cupUserCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cupUserCopy strong {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupUserCopy small {
+  margin-top: 3px;
+  color: #71879a;
+  font-size: 8px;
+}
+
+.cupJersey {
+  height: 34px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--cup-green);
+}
+
+.cupJersey b {
+  position: absolute;
+  top: 12px;
+  color: var(--cup-yellow);
+  font-size: 6px;
+}
+
+.cupSidebarUser > button {
+  height: 28px;
+  padding: 0;
+  border: 0;
+  color: #688095;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.cupSidebarMobileClose {
+  display: none;
+}
+
+.cupMain {
+  min-width: 0;
+  flex: 1;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(24, 191, 255, 0.18) transparent;
+}
+
+.cupHeader {
+  min-height: 78px;
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 13px clamp(24px, 3vw, 46px);
+  border-bottom: 1px solid rgba(24, 191, 255, 0.08);
+  background: rgba(2, 11, 22, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.cupHeaderTitle {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cupHeader h1 {
+  overflow: hidden;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(20px, 2.1vw, 31px);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupHeader h1 span {
+  color: var(--cup-yellow);
+}
+
+.cupHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.cupCloseChatsButton,
+.cupNoticesButton {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 850;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.cupCloseChatsButton {
+  padding: 0 14px;
+  border: 1px solid rgba(255, 210, 31, 0.46);
+  color: var(--cup-yellow);
+  background: rgba(255, 210, 31, 0.045);
+}
+
+.cupNoticesButton {
+  padding: 0 10px;
+  border: 0;
+  color: var(--cup-yellow);
+  background: transparent;
+}
+
+.cupCloseChatsButton:hover,
+.cupNoticesButton:hover {
+  transform: translateY(-2px);
+}
+
+.cupCloseChatsButton:hover {
+  border-color: var(--cup-yellow);
+  box-shadow: 0 0 18px rgba(255, 210, 31, 0.1);
+}
+
+.cupMobileMenuButton {
+  display: none;
+}
+
+.cupContent {
+  width: min(100%, 1540px);
+  min-height: calc(100vh - 78px);
+  position: relative;
+  margin: 0 auto;
+  padding: 20px clamp(24px, 3vw, 46px) 28px;
+}
+
+.cupHero {
+  min-height: 365px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(330px, 0.6fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 66px);
+  padding: clamp(31px, 4vw, 55px);
+  border: 1px solid rgba(24, 191, 255, 0.18);
+  border-radius: 27px;
+  background:
+    radial-gradient(circle at 17% 7%, rgba(0, 212, 255, 0.14), transparent 22%),
+    radial-gradient(circle at 72% 82%, rgba(57, 211, 83, 0.08), transparent 28%),
+    linear-gradient(115deg, rgba(6, 24, 39, 0.98), rgba(2, 12, 23, 0.98));
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.28),
+    inset 0 1px rgba(255, 255, 255, 0.025),
+    0 0 0 1px rgba(57, 211, 83, 0.025);
+}
+
+.cupHero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.38;
+  background:
+    linear-gradient(118deg, transparent 0 35%, rgba(255, 255, 255, 0.018) 36% 37%, transparent 38% 62%, rgba(57, 211, 83, 0.025) 63% 65%, transparent 66%),
+    repeating-linear-gradient(0deg, transparent 0 46px, rgba(24, 191, 255, 0.018) 47px 48px);
+}
+
+.cupHero::after {
+  content: "";
+  width: 520px;
+  height: 220px;
+  position: absolute;
+  left: 24%;
+  bottom: -165px;
+  border: 1px solid rgba(57, 211, 83, 0.13);
+  border-radius: 50%;
+  box-shadow: 0 0 0 38px rgba(57, 211, 83, 0.018);
+}
+
+.cupStadiumLights {
+  position: absolute;
+  top: 15px;
+  display: flex;
+  gap: 7px;
+  transform: rotate(-9deg);
+}
+
+.cupStadiumLights--left {
+  left: 21px;
+}
+
+.cupStadiumLights--right {
+  right: 28%;
+  transform: rotate(8deg);
+}
+
+.cupStadiumLights i {
+  width: 21px;
+  height: 6px;
+  display: block;
+  border-radius: 50%;
+  background: #c9f4ff;
+  box-shadow:
+    0 0 13px rgba(158, 235, 255, 0.85),
+    0 12px 42px rgba(24, 191, 255, 0.22);
+}
+
+.cupFieldLines {
+  width: 420px;
+  height: 230px;
+  position: absolute;
+  right: -110px;
+  bottom: -110px;
+  border: 1px solid rgba(57, 211, 83, 0.11);
+  border-radius: 50%;
+  box-shadow: inset 0 0 70px rgba(57, 211, 83, 0.03);
+}
+
+.cupFieldLines::before {
+  content: "";
+  width: 130px;
+  height: 90px;
+  position: absolute;
+  left: 31px;
+  top: 12px;
+  border: 1px solid rgba(57, 211, 83, 0.11);
+}
+
+.cupConfetti {
+  width: 5px;
+  height: 12px;
+  position: absolute;
+  z-index: 1;
+  border-radius: 2px;
+  opacity: 0.75;
+  transform: rotate(24deg);
+}
+
+.cupConfetti--one {
+  left: 8%;
+  top: 19%;
+  background: var(--cup-yellow);
+}
+
+.cupConfetti--two {
+  left: 43%;
+  top: 12%;
+  background: var(--cup-green);
+  transform: rotate(62deg);
+}
+
+.cupConfetti--three {
+  left: 52%;
+  bottom: 16%;
+  background: var(--cup-cyan);
+  transform: rotate(-29deg);
+}
+
+.cupConfetti--four {
+  right: 5%;
+  top: 22%;
+  background: var(--cup-yellow);
+  transform: rotate(-58deg);
+}
+
+.cupConfetti--five {
+  right: 32%;
+  bottom: 9%;
+  background: var(--cup-green);
+  transform: rotate(77deg);
+}
+
+.cupHeroCopy,
+.cupOfferCard {
+  position: relative;
+  z-index: 3;
+}
+
+.cupCampaignBadge {
+  width: fit-content;
+  min-height: 27px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid rgba(57, 211, 83, 0.26);
+  border-radius: 999px;
+  color: #7aea91;
+  background: rgba(57, 211, 83, 0.08);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cupHeroCopy h2 {
+  max-width: 760px;
+  margin: 19px 0 13px;
+  color: #fff;
+  font-size: clamp(42px, 4.6vw, 71px);
+  font-weight: 950;
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+.cupHeroCopy h2 span {
+  display: block;
+  color: var(--cup-yellow);
+  text-shadow: 0 0 28px rgba(255, 210, 31, 0.09);
+}
+
+.cupHeroCopy > p {
+  max-width: 650px;
+  margin: 0;
+  color: #91a7bc;
+  font-size: clamp(11px, 1.05vw, 14px);
+  line-height: 1.6;
+}
+
+.cupHeroStats {
+  max-width: 670px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 28px;
+  padding-top: 23px;
+  border-top: 1px solid rgba(156, 175, 195, 0.09);
+}
+
+.cupStatItem {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 20px;
+  border-right: 1px solid rgba(156, 175, 195, 0.1);
+}
+
+.cupStatItem:first-child {
+  padding-left: 0;
+}
+
+.cupStatItem:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.cupStatIcon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(57, 211, 83, 0.16);
+  border-radius: 12px;
+  color: var(--cup-green);
+  background: rgba(57, 211, 83, 0.06);
+}
+
+.cupStatItem > span:last-child {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 7px;
+  align-items: end;
+}
+
+.cupStatItem small {
+  grid-column: 1 / -1;
+  margin-bottom: 3px;
+  color: #6f879c;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.cupStatItem strong {
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.cupStatItem em {
+  overflow: hidden;
+  align-self: end;
+  color: #6d8397;
+  font-size: 7px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupOfferCard {
+  min-height: 275px;
+  overflow: hidden;
+  padding: 24px 22px 20px;
+  border: 1px solid rgba(57, 211, 83, 0.28);
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 14% 2%, rgba(0, 212, 255, 0.18), transparent 26%),
+    radial-gradient(circle at 91% 88%, rgba(57, 211, 83, 0.15), transparent 27%),
+    linear-gradient(145deg, rgba(7, 39, 47, 0.96), rgba(3, 20, 31, 0.98));
+  box-shadow:
+    0 22px 42px rgba(0, 0, 0, 0.29),
+    inset 0 1px rgba(255, 255, 255, 0.035),
+    0 0 24px rgba(57, 211, 83, 0.04);
+}
+
+.cupOfferLabel {
+  position: relative;
+  z-index: 2;
+  color: #7e98aa;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.cupOfferCard h3 {
+  position: relative;
+  z-index: 2;
+  margin: 16px 0 18px;
+  color: #fff;
+  font-size: clamp(28px, 2.7vw, 42px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 0.94;
+  text-align: center;
+}
+
+.cupOfferCard h3 span {
+  display: block;
+  margin-top: 7px;
+  color: var(--cup-green);
+  font-size: 0.57em;
+  letter-spacing: -0.02em;
+}
+
+.cupOfferBenefits {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.cupOfferBenefits > span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 7px;
+  border-right: 1px solid rgba(156, 175, 195, 0.11);
+  color: var(--cup-cyan-bright);
+  text-align: center;
+}
+
+.cupOfferBenefits > span:last-child {
+  border-right: 0;
+}
+
+.cupOfferBenefits strong {
+  overflow: hidden;
+  width: 100%;
+  margin-top: 6px;
+  color: #dfeaf3;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupOfferBenefits small {
+  margin-top: 2px;
+  color: #70879b;
+  font-size: 7px;
+}
+
+.cupOfferCard > button {
+  width: 100%;
+  min-height: 42px;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 11px;
+  color: #0a1720;
+  background: linear-gradient(135deg, #ffe15f, var(--cup-yellow-deep));
+  box-shadow: 0 11px 22px rgba(246, 196, 0, 0.16);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 950;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.cupOfferCard > button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 28px rgba(246, 196, 0, 0.22);
+}
+
+.cupOfferNet {
+  width: 100px;
+  height: 83px;
+  position: absolute;
+  left: -19px;
+  top: -15px;
+  opacity: 0.34;
+  transform: rotate(-9deg);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 12px, rgba(255, 255, 255, 0.24) 13px 14px),
+    repeating-linear-gradient(0deg, transparent 0 12px, rgba(255, 255, 255, 0.24) 13px 14px);
+}
+
+.cupOfferBall {
+  width: 33px;
+  height: 33px;
+  position: absolute;
+  left: 35px;
+  top: 29px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 48%, #07111a 0 16%, transparent 17%),
+    conic-gradient(from 15deg, #fff 0 16%, #82909b 17% 19%, #fff 20% 36%, #82909b 37% 39%, #fff 40% 56%, #82909b 57% 59%, #fff 60%);
+  box-shadow: 0 0 13px rgba(255, 255, 255, 0.23);
+}
+
+.cupOfferRibbon {
+  width: 170px;
+  height: 64px;
+  position: absolute;
+  right: -55px;
+  bottom: -31px;
+  border: 8px solid var(--cup-green);
+  border-left-color: var(--cup-yellow);
+  border-radius: 50%;
+  opacity: 0.48;
+  transform: rotate(-13deg);
+}
+
+.cupInfoGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.cupWikiCard,
+.cupAlertsCard {
+  min-height: 145px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.cupWikiCard:hover,
+.cupAlertsCard:hover,
+.cupQuickCard:hover {
+  transform: translateY(-3px);
+}
+
+.cupWikiCard {
+  grid-template-columns: 52px minmax(0, 1fr) 150px;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid rgba(57, 211, 83, 0.2);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(57, 211, 83, 0.09), transparent 34%),
+    linear-gradient(125deg, rgba(7, 30, 39, 0.98), rgba(3, 18, 29, 0.98));
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.17);
+}
+
+.cupWikiIcon,
+.cupAlertIcon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+}
+
+.cupWikiIcon {
+  color: var(--cup-green);
+  background: rgba(57, 211, 83, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(57, 211, 83, 0.13);
+}
+
+.cupWikiCopy,
+.cupAlertsCopy {
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.cupInfoTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cupInfoTitleRow strong {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cupInfoTitleRow em {
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 6px;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cupWikiCopy .cupInfoTitleRow em {
+  border: 1px solid rgba(255, 210, 31, 0.25);
+  color: var(--cup-yellow);
+  background: rgba(255, 210, 31, 0.07);
+}
+
+.cupWikiCopy > small {
+  max-width: 330px;
+  margin-top: 9px;
+  color: #8198ac;
+  font-size: 9px;
+  line-height: 1.48;
+}
+
+.cupWikiCopy > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  color: var(--cup-green);
+  font-size: 8px;
+}
+
+.cupTacticalBoard {
+  width: 143px;
+  height: 96px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(57, 211, 83, 0.2);
+  border-radius: 12px;
+  opacity: 0.58;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(57, 211, 83, 0.18) 50%, transparent 51%),
+    radial-gradient(circle at center, transparent 0 22px, rgba(57, 211, 83, 0.16) 23px 24px, transparent 25px),
+    rgba(57, 211, 83, 0.025);
+}
+
+.cupTacticalBoard > svg {
+  position: absolute;
+  right: -8px;
+  bottom: -13px;
+  color: rgba(57, 211, 83, 0.28);
+}
+
+.cupTacticX,
+.cupTacticO,
+.cupTacticLine {
+  position: absolute;
+}
+
+.cupTacticX {
+  color: rgba(255, 210, 31, 0.58);
+  font-size: 18px;
+}
+
+.cupTacticX--one {
+  left: 18px;
+  top: 17px;
+}
+
+.cupTacticX--two {
+  right: 25px;
+  top: 38px;
+}
+
+.cupTacticO {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(0, 212, 255, 0.48);
+  border-radius: 50%;
+}
+
+.cupTacticO--one {
+  left: 51px;
+  bottom: 16px;
+}
+
+.cupTacticO--two {
+  right: 40px;
+  top: 13px;
+}
+
+.cupTacticLine {
+  height: 1px;
+  background: rgba(57, 211, 83, 0.45);
+  transform-origin: left;
+}
+
+.cupTacticLine--one {
+  width: 47px;
+  left: 28px;
+  top: 31px;
+  transform: rotate(24deg);
+}
+
+.cupTacticLine--two {
+  width: 43px;
+  left: 59px;
+  bottom: 28px;
+  transform: rotate(-26deg);
+}
+
+.cupAlertsCard {
+  grid-template-columns: 55px minmax(0, 1fr) 28px;
+  gap: 14px;
+  padding: 22px 24px;
+  border: 1px solid rgba(255, 77, 67, 0.3);
+  background:
+    radial-gradient(circle at 8% 50%, rgba(255, 59, 48, 0.13), transparent 30%),
+    linear-gradient(122deg, rgba(39, 15, 23, 0.98), rgba(10, 16, 28, 0.99));
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.18),
+    0 0 24px rgba(255, 59, 48, 0.035);
+}
+
+.cupAlertIcon {
+  color: #ff645b;
+  background: rgba(255, 59, 48, 0.09);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 90, 78, 0.18),
+    0 0 24px rgba(255, 59, 48, 0.08);
+}
+
+.cupAlertsCopy .cupInfoTitleRow em {
+  border: 1px solid rgba(255, 90, 78, 0.27);
+  color: #ff8a82;
+  background: rgba(255, 59, 48, 0.08);
+}
+
+.cupAlertsCopy > small {
+  margin-top: 9px;
+  color: #ff8d85;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cupAlertChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 11px;
+}
+
+.cupAlertChips i {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 90, 78, 0.22);
+  border-radius: 999px;
+  color: #d99995;
+  background: rgba(255, 59, 48, 0.055);
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.cupAlertChips b {
+  color: #fff;
+}
+
+.cupAlertsArrow {
+  position: relative;
+  z-index: 2;
+  color: #ff6a61;
+}
+
+.cupCrowd {
+  position: absolute;
+  right: 38px;
+  bottom: -3px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  opacity: 0.08;
+}
+
+.cupCrowd i {
+  width: 13px;
+  height: 40px;
+  display: block;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+  transform: rotate(var(--crowd-rotate, 0));
+}
+
+.cupCrowd i:nth-child(2n) {
+  height: 53px;
+}
+
+.cupCrowd i:nth-child(3n) {
+  height: 34px;
+}
+
+.cupQuickSection {
+  position: relative;
+  margin-top: 23px;
+}
+
+.cupSectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 13px;
+}
+
+.cupHeadingBall {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.cupSectionHeading h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cupSectionHeading p {
+  margin: 3px 0 0;
+  color: #687f94;
+  font-size: 8px;
+}
+
+.cupQuickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.cupQuickCard {
+  min-width: 0;
+  min-height: 82px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid rgba(24, 191, 255, 0.12);
+  border-radius: 17px;
+  background:
+    linear-gradient(140deg, rgba(8, 29, 44, 0.96), rgba(3, 16, 28, 0.98));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.13);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.cupQuickCard:hover {
+  border-color: rgba(57, 211, 83, 0.32);
+  box-shadow:
+    0 17px 33px rgba(0, 0, 0, 0.2),
+    0 0 19px rgba(57, 211, 83, 0.04);
+}
+
+.cupQuickIcon {
+  width: 44px;
+  height: 44px;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+}
+
+.cupQuickCard--green .cupQuickIcon {
+  color: var(--cup-green);
+  background: rgba(57, 211, 83, 0.075);
+}
+
+.cupQuickCard--cyan .cupQuickIcon {
+  color: var(--cup-cyan-bright);
+  background: rgba(0, 212, 255, 0.075);
+}
+
+.cupQuickCard--blue .cupQuickIcon {
+  color: #52a3ff;
+  background: rgba(55, 135, 230, 0.075);
+}
+
+.cupQuickCard--yellow .cupQuickIcon {
+  color: var(--cup-yellow);
+  background: rgba(255, 210, 31, 0.075);
+}
+
+.cupQuickCopy {
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.cupQuickCopy strong {
+  overflow: hidden;
+  color: #e7f1fa;
+  font-size: 11px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupQuickCopy small {
+  overflow: hidden;
+  margin-top: 4px;
+  color: #6c8499;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupQuickArrow {
+  position: relative;
+  z-index: 2;
+  color: var(--cup-green);
+  transition: transform 180ms ease;
+}
+
+.cupQuickCard:hover .cupQuickArrow {
+  transform: translateX(4px);
+}
+
+.cupQuickStripe {
+  width: 75px;
+  height: 16px;
+  position: absolute;
+  right: -26px;
+  bottom: -4px;
+  border-top: 4px solid rgba(57, 211, 83, 0.45);
+  border-bottom: 3px solid rgba(255, 210, 31, 0.4);
+  transform: rotate(-20deg);
+}
+
+.cupNetworkDetail {
+  width: 115px;
+  height: 70px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  opacity: 0.11;
+  background:
+    radial-gradient(circle at 15% 50%, var(--cup-cyan) 0 3px, transparent 4px),
+    radial-gradient(circle at 55% 25%, var(--cup-cyan) 0 3px, transparent 4px),
+    radial-gradient(circle at 85% 65%, var(--cup-green) 0 3px, transparent 4px),
+    linear-gradient(22deg, transparent 43%, var(--cup-cyan) 44% 45%, transparent 46%),
+    linear-gradient(-17deg, transparent 52%, var(--cup-green) 53% 54%, transparent 55%);
+}
+
+.cupGrassTexture {
+  height: 34px;
+  margin: 14px -30px -28px;
+  opacity: 0.16;
+  background:
+    repeating-linear-gradient(90deg, rgba(57, 211, 83, 0.13) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, transparent, rgba(57, 211, 83, 0.1));
+  mask-image: linear-gradient(transparent, #000);
+}
+
+.cupLoading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(24, 191, 255, 0.11), transparent 25%),
+    #020b16;
+  font-family: Inter, system-ui, sans-serif;
+  text-align: center;
+}
+
+.cupLoadingIcon {
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 17px;
+  border: 1px solid rgba(57, 211, 83, 0.3);
+  border-radius: 50%;
+  color: var(--cup-green, #39d353);
+  background: rgba(57, 211, 83, 0.06);
+  box-shadow: 0 0 30px rgba(57, 211, 83, 0.07);
+  animation: cupLoadingPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes cupLoadingPulse {
+  50% {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(57, 211, 83, 0.1);
+  }
+}
+
+.cupLoading strong {
+  font-size: 18px;
+}
+
+.cupLoading > span {
+  margin-top: 7px;
+  color: #758ca1;
+  font-size: 11px;
+}
+
+.cupLoading > button {
+  min-height: 38px;
+  margin-top: 18px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 210, 31, 0.36);
+  border-radius: 999px;
+  color: var(--cup-yellow, #ffd21f);
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.cupMobileOverlay {
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  .cupSidebar {
+    width: 282px;
+    min-width: 282px;
+  }
+
+  .cupHero {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.62fr);
+    gap: 27px;
+  }
+
+  .cupHeroCopy h2 {
+    font-size: clamp(40px, 4.6vw, 60px);
+  }
+
+  .cupWikiCard {
+    grid-template-columns: 46px minmax(0, 1fr) 110px;
+  }
+
+  .cupTacticalBoard {
+    width: 108px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .cupHeader {
+    padding-inline: 24px;
+  }
+
+  .cupHeader h1 {
+    font-size: 22px;
+  }
+
+  .cupNoticesButton {
+    display: none;
+  }
+
+  .cupContent {
+    padding-inline: 24px;
+  }
+
+  .cupHero {
+    grid-template-columns: 1fr;
+  }
+
+  .cupOfferCard {
+    width: min(100%, 430px);
+  }
+
+  .cupInfoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 840px) {
+  .cupSidebar {
+    width: min(310px, 88vw);
+    min-width: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 30;
+    padding: 8px 0 8px 8px;
+    transform: translateX(-106%);
+    transition: transform 220ms ease;
+  }
+
+  .cupSidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .cupSidebarMobileClose {
+    width: 31px;
+    height: 31px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(156, 175, 195, 0.12);
+    border-radius: 9px;
+    color: #a9bbca;
+    background: rgba(3, 13, 24, 0.75);
+    cursor: pointer;
+  }
+
+  .cupBrandActions {
+    margin-right: 35px;
+  }
+
+  .cupMobileOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    border: 0;
+    background: rgba(1, 8, 16, 0.68);
+    backdrop-filter: blur(4px);
+  }
+
+  .cupMobileMenuButton {
+    width: 37px;
+    height: 37px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    padding: 0;
+    border: 1px solid rgba(24, 191, 255, 0.18);
+    border-radius: 10px;
+    color: var(--cup-cyan);
+    background: rgba(24, 191, 255, 0.05);
+    cursor: pointer;
+  }
+
+  .cupCloseChatsButton {
+    display: none;
+  }
+
+  .cupHeader {
+    min-height: 68px;
+    padding: 10px 16px;
+  }
+
+  .cupHeader h1 {
+    font-size: clamp(16px, 4.5vw, 22px);
+  }
+
+  .cupMain {
+    height: 100vh;
+  }
+
+  .cupContent {
+    min-height: calc(100vh - 68px);
+    padding: 15px 16px 24px;
+  }
+
+  .cupQuickGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .cupHeader h1 span {
+    display: block;
+    margin-top: 2px;
+  }
+
+  .cupHero {
+    min-height: auto;
+    gap: 27px;
+    padding: 27px 20px;
+    border-radius: 21px;
+  }
+
+  .cupHeroCopy h2 {
+    margin-top: 17px;
+    font-size: clamp(39px, 12vw, 54px);
+  }
+
+  .cupHeroStats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cupStatItem,
+  .cupStatItem:first-child,
+  .cupStatItem:last-child {
+    padding: 0;
+    border-right: 0;
+  }
+
+  .cupOfferCard {
+    min-height: 270px;
+  }
+
+  .cupWikiCard {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 18px;
+  }
+
+  .cupTacticalBoard {
+    display: none;
+  }
+
+  .cupAlertsCard {
+    grid-template-columns: 48px minmax(0, 1fr) 20px;
+    padding: 18px;
+  }
+
+  .cupInfoTitleRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .cupQuickGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cupGrassTexture {
+    margin-inline: -16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cupPreview *,
+  .cupLoadingIcon {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

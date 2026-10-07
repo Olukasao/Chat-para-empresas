@@ -1,0 +1,764 @@
+.arraiaCampaignBanner,
+.arraiaCampaignBanner * {
+  box-sizing: border-box;
+}
+
+.arraiaCampaignBanner {
+  width: min(100%, 1160px);
+  min-height: clamp(330px, 28vw, 390px);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(315px, 0.44fr);
+  align-items: stretch;
+  gap: clamp(22px, 3vw, 46px);
+  padding: clamp(32px, 4vw, 52px) clamp(18px, 3.4vw, 42px) clamp(22px, 3vw, 34px);
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  border-radius: 22px;
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at 78% 14%, rgba(250, 204, 21, 0.13), transparent 22%),
+    radial-gradient(circle at 53% 86%, rgba(34, 211, 238, 0.22), transparent 30%),
+    radial-gradient(circle at 7% 8%, rgba(20, 184, 166, 0.24), transparent 28%),
+    linear-gradient(118deg, #020817 0%, #063349 53%, #03111e 100%);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.34),
+    0 0 34px rgba(34, 211, 238, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.arraiaCampaignBanner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+  pointer-events: none;
+  background:
+    linear-gradient(116deg, rgba(255, 255, 255, 0.035), transparent 32%, rgba(56, 189, 248, 0.08) 58%, transparent 76%),
+    repeating-linear-gradient(118deg, transparent 0 42px, rgba(255, 255, 255, 0.022) 43px 44px);
+}
+
+.arraiaCampaignBanner::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -2;
+  height: 44%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 22% 100%, rgba(250, 204, 21, 0.14), transparent 38%),
+    linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.26), transparent),
+    repeating-linear-gradient(90deg, rgba(34, 211, 238, 0.16) 0 2px, transparent 2px 76px);
+  mask-image: linear-gradient(transparent, #000 38%);
+}
+
+.arraiaFlags {
+  position: absolute;
+  top: 18px;
+  left: clamp(18px, 4vw, 58px);
+  right: clamp(18px, 4vw, 58px);
+  z-index: 6;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 36px;
+  pointer-events: none;
+}
+
+.arraiaFlags::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(226, 232, 240, 0.74), transparent);
+  transform: rotate(-1.4deg);
+}
+
+.arraiaFlags span {
+  width: clamp(16px, 2.1vw, 25px);
+  height: clamp(20px, 2.35vw, 30px);
+  display: block;
+  background: var(--flag-color);
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22));
+  transform: rotate(var(--flag-rotate, 4deg));
+}
+
+.arraiaFlags span:nth-child(2n) {
+  --flag-rotate: -6deg;
+  margin-top: 5px;
+}
+
+.arraiaFlags span:nth-child(3n) {
+  --flag-rotate: 8deg;
+  margin-top: 1px;
+}
+
+.arraiaLights {
+  position: absolute;
+  top: 54px;
+  left: 20%;
+  right: 26%;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.arraiaLights::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.45), transparent);
+}
+
+.arraiaLights span {
+  width: 7px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fef3c7;
+  box-shadow:
+    0 0 9px rgba(250, 204, 21, 0.95),
+    0 0 21px rgba(250, 204, 21, 0.38);
+}
+
+.arraiaLights span:nth-child(2n) {
+  background: #a7f3d0;
+  box-shadow:
+    0 0 9px rgba(45, 212, 191, 0.95),
+    0 0 22px rgba(45, 212, 191, 0.38);
+}
+
+.arraiaFiberLines {
+  position: absolute;
+  inset: auto -6% -10% -4%;
+  z-index: -1;
+  height: 46%;
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+.arraiaFiberLines span {
+  position: absolute;
+  left: 3%;
+  right: 5%;
+  height: 72px;
+  border-top: 2px solid rgba(34, 211, 238, 0.46);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.42));
+  transform: rotate(-4deg);
+}
+
+.arraiaFiberLines span:nth-child(1) {
+  bottom: 20px;
+}
+
+.arraiaFiberLines span:nth-child(2) {
+  bottom: 58px;
+  left: 15%;
+  right: -3%;
+  opacity: 0.58;
+  transform: rotate(-7deg);
+}
+
+.arraiaFiberLines span:nth-child(3) {
+  bottom: -4px;
+  left: -5%;
+  right: 18%;
+  opacity: 0.42;
+  transform: rotate(2deg);
+}
+
+.arraiaConfetti {
+  position: absolute;
+  z-index: 2;
+  width: 6px;
+  height: 14px;
+  border-radius: 2px;
+  pointer-events: none;
+  background: #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.18);
+}
+
+.arraiaConfetti-one { top: 24%; left: 5%; transform: rotate(26deg); }
+.arraiaConfetti-two { top: 19%; left: 42%; background: #22c55e; transform: rotate(-42deg); }
+.arraiaConfetti-three { top: 33%; left: 56%; background: #38bdf8; transform: rotate(18deg); }
+.arraiaConfetti-four { top: 72%; left: 46%; background: #f97316; transform: rotate(57deg); }
+.arraiaConfetti-five { top: 18%; right: 9%; background: #e879f9; transform: rotate(34deg); }
+.arraiaConfetti-six { top: 62%; right: 4%; background: #facc15; transform: rotate(-28deg); }
+.arraiaConfetti-seven { bottom: 17%; left: 8%; background: #38bdf8; transform: rotate(75deg); }
+.arraiaConfetti-eight { bottom: 10%; left: 38%; background: #22c55e; transform: rotate(-18deg); }
+.arraiaConfetti-nine { bottom: 26%; right: 34%; background: #f97316; transform: rotate(43deg); }
+.arraiaConfetti-ten { top: 48%; left: 62%; background: #facc15; transform: rotate(-62deg); }
+.arraiaConfetti-eleven { bottom: 34%; left: 2%; background: #e879f9; transform: rotate(10deg); }
+.arraiaConfetti-twelve { top: 41%; right: 25%; background: #38bdf8; transform: rotate(58deg); }
+
+.arraiaCampaignContent {
+  min-width: 0;
+  position: relative;
+  z-index: 4;
+  align-self: center;
+  padding-top: 14px;
+}
+
+.arraiaCampaignBadge {
+  width: fit-content;
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid rgba(250, 204, 21, 0.72);
+  border-radius: 999px;
+  color: #fde68a;
+  background:
+    linear-gradient(135deg, rgba(8, 47, 73, 0.74), rgba(20, 83, 45, 0.42));
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.12),
+    0 0 22px rgba(250, 204, 21, 0.08);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.arraiaCampaignTitle {
+  max-width: 700px;
+  margin: clamp(16px, 1.8vw, 22px) 0 14px;
+  color: #ffffff;
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 0.92;
+  text-align: left;
+  text-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.38),
+    0 0 28px rgba(34, 211, 238, 0.12);
+}
+
+.arraiaCampaignTitle span,
+.arraiaCampaignTitle mark {
+  display: block;
+}
+
+.arraiaCampaignTitle mark {
+  margin-top: 5px;
+  color: #facc15;
+  background: transparent;
+  text-shadow:
+    0 3px 16px rgba(0, 0, 0, 0.38),
+    0 0 26px rgba(250, 204, 21, 0.18);
+}
+
+.arraiaCampaignText {
+  max-width: 640px;
+  margin: 0;
+  color: rgba(226, 232, 240, 0.88);
+  font-size: clamp(13px, 1.14vw, 16px);
+  line-height: 1.58;
+  text-align: left;
+}
+
+.arraiaCampaignText strong {
+  color: #67e8f9;
+  font-weight: 900;
+}
+
+.arraiaCampaignText mark {
+  color: #fde047;
+  background: transparent;
+  font-weight: 900;
+}
+
+.arraiaCampaignFooter {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: clamp(22px, 3vw, 34px);
+}
+
+.arraiaCampaignPlate {
+  min-width: 184px;
+  min-height: 44px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding: 8px 22px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 12px;
+  color: #e0faff;
+  background:
+    linear-gradient(90deg, rgba(30, 64, 84, 0.9), rgba(8, 47, 73, 0.88)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 8px);
+  box-shadow:
+    0 13px 24px rgba(0, 0, 0, 0.2),
+    0 0 24px rgba(34, 211, 238, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.arraiaCampaignPlate::before,
+.arraiaCampaignPlate::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 1px;
+  height: 16px;
+  background: rgba(226, 232, 240, 0.42);
+}
+
+.arraiaCampaignPlate::before { left: 22px; }
+.arraiaCampaignPlate::after { right: 22px; }
+
+.arraiaCampaignPlate i {
+  position: absolute;
+  inset: 7px;
+  border-radius: 9px;
+  border: 1px solid rgba(250, 204, 21, 0.18);
+  pointer-events: none;
+}
+
+.arraiaBonfire {
+  width: 74px;
+  height: 72px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.arraiaBonfireGlow {
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  bottom: 2px;
+  height: 28px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.38), transparent 68%);
+  filter: blur(8px);
+}
+
+.arraiaBonfireLog {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  width: 45px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c2d12, #d97706, #78350f);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.16);
+}
+
+.arraiaBonfireLogLeft { transform: rotate(23deg); }
+.arraiaBonfireLogRight { transform: rotate(-23deg); }
+
+.arraiaFlame {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  border-radius: 52% 48% 48% 52%;
+  transform: translateX(-50%) rotate(45deg);
+  transform-origin: 50% 82%;
+}
+
+.arraiaFlameBack {
+  width: 38px;
+  height: 38px;
+  background: #fb923c;
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.34);
+}
+
+.arraiaFlameMiddle {
+  width: 29px;
+  height: 29px;
+  bottom: 23px;
+  background: #facc15;
+}
+
+.arraiaFlameFront {
+  width: 18px;
+  height: 18px;
+  bottom: 26px;
+  background: #fff7ed;
+}
+
+.arraiaOfferCard {
+  min-width: 0;
+  min-height: 100%;
+  position: relative;
+  z-index: 5;
+  overflow: hidden;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(22px, 2.6vw, 32px) clamp(18px, 2.2vw, 28px);
+  border: 1px solid rgba(34, 211, 238, 0.62);
+  border-radius: 20px;
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(34, 211, 238, 0.23), transparent 28%),
+    radial-gradient(circle at 92% 88%, rgba(250, 204, 21, 0.13), transparent 29%),
+    linear-gradient(148deg, rgba(8, 47, 73, 0.98), rgba(2, 8, 23, 0.99));
+  box-shadow:
+    0 20px 46px rgba(0, 0, 0, 0.32),
+    0 0 28px rgba(34, 211, 238, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.arraiaOfferCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 28%, rgba(34, 211, 238, 0.1) 72%, transparent),
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 255, 255, 0.022) 35px 36px);
+  pointer-events: none;
+}
+
+.arraiaOfferRibbon {
+  position: absolute;
+  top: 18px;
+  right: -43px;
+  z-index: 2;
+  width: 142px;
+  height: 26px;
+  background: linear-gradient(135deg, #facc15, #fb923c);
+  transform: rotate(32deg);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.arraiaOfferFlagCorner {
+  position: absolute;
+  left: -18px;
+  bottom: 16px;
+  z-index: 1;
+  width: 118px;
+  height: 38px;
+  opacity: 0.72;
+  background:
+    linear-gradient(135deg, #22c55e 0 24%, transparent 24% 29%, #facc15 29% 53%, transparent 53% 58%, #38bdf8 58% 82%, transparent 82%);
+  filter: drop-shadow(0 9px 14px rgba(0, 0, 0, 0.16));
+  transform: rotate(13deg);
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
+}
+
+.arraiaStrawHat {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 3;
+  width: 64px;
+  height: 35px;
+  transform: rotate(-13deg);
+  opacity: 0.95;
+}
+
+.arraiaStrawHat i {
+  position: absolute;
+  left: 14px;
+  top: 0;
+  width: 36px;
+  height: 24px;
+  border-radius: 50% 50% 14px 14px;
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 53, 15, 0.16) 0 2px, transparent 2px 5px),
+    linear-gradient(135deg, #fde68a, #d97706);
+  box-shadow: inset 0 -4px 0 rgba(120, 53, 15, 0.24);
+}
+
+.arraiaStrawHat b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 15px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(120, 53, 15, 0.3), transparent 18%, transparent 82%, rgba(120, 53, 15, 0.28)),
+    linear-gradient(135deg, #fef3c7, #f59e0b);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.arraiaOfferHeader,
+.arraiaOfferBenefits,
+.arraiaOfferButton {
+  position: relative;
+  z-index: 3;
+}
+
+.arraiaOfferHeader {
+  margin: 12px 0 clamp(22px, 2.4vw, 30px);
+  text-align: center;
+}
+
+.arraiaOfferHeader small {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid rgba(34, 211, 238, 0.36);
+  border-radius: 999px;
+  color: #a5f3fc;
+  background: rgba(8, 47, 73, 0.62);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.arraiaOfferHeader h3 {
+  margin: 14px 0 4px;
+  color: #ffffff;
+  font-size: clamp(42px, 4vw, 56px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 0.95;
+  text-shadow: 0 0 24px rgba(34, 211, 238, 0.17);
+}
+
+.arraiaOfferHeader p {
+  margin: 0;
+  color: #facc15;
+  font-size: clamp(22px, 2.2vw, 31px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(250, 204, 21, 0.16);
+}
+
+.arraiaOfferBenefits {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: clamp(18px, 2vw, 24px);
+}
+
+.arraiaOfferBenefit {
+  min-width: 0;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 13px;
+  background: rgba(2, 8, 23, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.arraiaOfferBenefitIcon {
+  width: 36px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #07111e;
+  background: linear-gradient(135deg, #67e8f9, #22c55e);
+  box-shadow: 0 0 17px rgba(34, 211, 238, 0.2);
+}
+
+.arraiaOfferBenefit strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #ecfeff;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.18;
+}
+
+.arraiaOfferButton {
+  width: 100%;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 12px;
+  color: #111827;
+  background: linear-gradient(135deg, #fde047, #f59e0b);
+  box-shadow:
+    0 16px 28px rgba(245, 158, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.46);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.arraiaOfferButton:hover,
+.arraiaOfferButton:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow:
+    0 20px 36px rgba(245, 158, 11, 0.28),
+    0 0 20px rgba(250, 204, 21, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  outline: none;
+}
+
+.arraiaOfferSignal {
+  position: absolute;
+  right: -26px;
+  bottom: -23px;
+  z-index: 1;
+  color: rgba(34, 211, 238, 0.16);
+  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.2));
+  transform: rotate(-9deg);
+}
+
+@media (max-width: 1120px) {
+  .arraiaCampaignBanner {
+    grid-template-columns: minmax(0, 1fr) minmax(292px, 0.48fr);
+    gap: 24px;
+  }
+
+  .arraiaCampaignTitle {
+    font-size: clamp(39px, 4.8vw, 62px);
+  }
+
+  .arraiaOfferHeader h3 {
+    font-size: clamp(38px, 4vw, 50px);
+  }
+}
+
+@media (max-width: 900px) {
+  .arraiaCampaignBanner {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .arraiaOfferCard {
+    width: min(100%, 440px);
+    min-height: 315px;
+    justify-self: center;
+  }
+
+  .arraiaLights {
+    left: 16%;
+    right: 16%;
+  }
+}
+
+@media (max-width: 620px) {
+  .arraiaCampaignBanner {
+    gap: 24px;
+    padding: 72px 18px 22px;
+    border-radius: 18px;
+  }
+
+  .arraiaFlags {
+    top: 15px;
+    left: 14px;
+    right: 14px;
+  }
+
+  .arraiaFlags span {
+    width: 16px;
+    height: 21px;
+  }
+
+  .arraiaLights {
+    top: 48px;
+    left: 18px;
+    right: 18px;
+  }
+
+  .arraiaCampaignContent {
+    padding-top: 0;
+  }
+
+  .arraiaCampaignBadge {
+    min-height: 27px;
+    font-size: 9px;
+  }
+
+  .arraiaCampaignTitle {
+    font-size: clamp(36px, 11.3vw, 50px);
+    line-height: 0.96;
+  }
+
+  .arraiaCampaignText {
+    font-size: 13px;
+  }
+
+  .arraiaCampaignFooter {
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .arraiaCampaignPlate {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .arraiaBonfire {
+    width: 60px;
+    height: 60px;
+  }
+
+  .arraiaOfferCard {
+    width: 100%;
+    min-height: 0;
+    padding: 24px 16px 18px;
+    border-radius: 18px;
+  }
+
+  .arraiaOfferHeader {
+    margin-top: 20px;
+  }
+
+  .arraiaOfferBenefits {
+    gap: 8px;
+  }
+
+  .arraiaOfferBenefit {
+    min-height: 45px;
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .arraiaOfferButton {
+    min-height: 44px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .arraiaCampaignTitle {
+    font-size: 34px;
+  }
+
+  .arraiaOfferHeader h3 {
+    font-size: 38px;
+  }
+
+  .arraiaOfferHeader p {
+    font-size: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arraiaCampaignBanner *,
+  .arraiaCampaignBanner *::before,
+  .arraiaCampaignBanner *::after {
+    transition: none !important;
+  }
+}

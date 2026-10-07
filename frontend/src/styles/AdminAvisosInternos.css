@@ -1,0 +1,327 @@
+.admin-avisos-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 1.05fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.admin-avisos-layout button,
+.admin-avisos-success + .admin-avisos-layout button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.admin-avisos-success {
+  margin-bottom: 16px;
+  border: 1px solid #abefc6;
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-avisos-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.admin-avisos-form-block {
+  border: 1px solid #edf0f4;
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.admin-avisos-block-header,
+.admin-avisos-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-avisos-block-header {
+  padding: 14px;
+  border-bottom: 1px solid #edf0f4;
+  background: white;
+}
+
+.admin-avisos-block-header h3 {
+  margin: 0;
+  color: #17202a;
+  font-size: 15px;
+}
+
+.admin-avisos-block-header p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.admin-avisos-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.admin-avisos-form-grid-compact {
+  grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1.2fr);
+  padding: 0;
+}
+
+.admin-avisos-field-wide {
+  grid-column: 1 / -1;
+}
+
+.admin-avisos-fields label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-avisos-fields input,
+.admin-avisos-fields textarea {
+  width: 100%;
+  border: 1px solid #cdd5df;
+  border-radius: 6px;
+  background: white;
+  color: #17202a;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 10px 12px;
+  text-transform: none;
+}
+
+.admin-avisos-fields textarea {
+  resize: vertical;
+}
+
+.admin-avisos-fields input:focus,
+.admin-avisos-fields textarea:focus {
+  outline: 2px solid rgba(15, 118, 110, 0.18);
+  border-color: #0f766e;
+}
+
+.admin-avisos-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.admin-avisos-form-grid + .admin-avisos-item-list {
+  padding-top: 0;
+}
+
+.admin-avisos-goal-reset-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 14px 14px 0;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(14, 165, 233, 0.08));
+}
+
+.admin-avisos-goal-reset-info {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.admin-avisos-goal-reset-info span,
+.admin-avisos-goal-reset-info small {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-avisos-goal-reset-info strong {
+  color: #0f766e;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.admin-avisos-goal-reset-info p {
+  margin: 0;
+  color: #344054;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.admin-avisos-item-card {
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  padding: 12px;
+  background: white;
+}
+
+.admin-avisos-item-header {
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.admin-avisos-item-header strong {
+  color: #17202a;
+  font-size: 13px;
+}
+
+.admin-avisos-preview-panel {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: white;
+}
+
+.admin-avisos-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  border-bottom: 1px solid #d8dee6;
+  padding: 12px 14px;
+  background: white;
+}
+
+.admin-avisos-preview-header strong {
+  color: #17202a;
+  font-size: 14px;
+}
+
+.admin-avisos-preview-header span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-avisos-preview-panel .avisos-header {
+  padding-top: 28px;
+}
+
+.admin-avisos-preview-panel .avisos-header-text {
+  padding-right: 0;
+}
+
+.admin-avisos-preview-panel .avisos-title {
+  font-size: 34px;
+}
+
+.admin-avisos-preview-panel .avisos-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-avisos-preview-panel .avisos-content {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 1180px) {
+  .admin-avisos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-avisos-preview-panel {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-avisos-fields,
+  .admin-avisos-form-grid,
+  .admin-avisos-item-list {
+    padding: 12px;
+  }
+
+  .admin-avisos-form-grid,
+  .admin-avisos-form-grid-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-avisos-block-header,
+  .admin-avisos-item-header,
+  .admin-avisos-goal-reset-card,
+  .admin-avisos-preview-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-avisos-preview-panel .avisos-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-theme='escuro'] .admin-avisos-success {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(20, 83, 45, 0.28);
+  color: #bbf7d0;
+}
+
+[data-theme='escuro'] .admin-avisos-form-block,
+[data-theme='escuro'] .admin-avisos-item-card,
+[data-theme='escuro'] .admin-avisos-preview-panel {
+  border-color: rgba(148, 163, 184, 0.14);
+  background: rgba(8, 17, 31, 0.72);
+}
+
+[data-theme='escuro'] .admin-avisos-block-header,
+[data-theme='escuro'] .admin-avisos-preview-header {
+  border-color: rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.86);
+}
+
+[data-theme='escuro'] .admin-avisos-block-header h3,
+[data-theme='escuro'] .admin-avisos-item-header strong,
+[data-theme='escuro'] .admin-avisos-preview-header strong {
+  color: #f8fafc;
+}
+
+[data-theme='escuro'] .admin-avisos-goal-reset-card {
+  border-color: rgba(34, 211, 238, 0.18);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(250, 204, 21, 0.08));
+}
+
+[data-theme='escuro'] .admin-avisos-goal-reset-info strong {
+  color: #67e8f9;
+}
+
+[data-theme='escuro'] .admin-avisos-goal-reset-info p {
+  color: #cbd5e1;
+}
+
+[data-theme='escuro'] .admin-avisos-block-header p,
+[data-theme='escuro'] .admin-avisos-preview-header span {
+  color: #94a3b8;
+}
+
+[data-theme='escuro'] .admin-avisos-fields label {
+  color: #cbd5e1;
+}
+
+[data-theme='escuro'] .admin-avisos-fields input,
+[data-theme='escuro'] .admin-avisos-fields textarea {
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(2, 6, 23, 0.42);
+  color: #f8fafc;
+}

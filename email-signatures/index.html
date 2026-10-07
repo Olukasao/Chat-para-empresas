@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerador de assinaturas de e-mail</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 32px;
+      background:
+        radial-gradient(circle at 14% 12%, rgba(34, 191, 255, 0.14), transparent 30%),
+        radial-gradient(circle at 88% 10%, rgba(14, 75, 85, 0.14), transparent 28%),
+        linear-gradient(135deg, #061425 0%, #08111f 48%, #0f172a 100%);
+      color: #f8fafc;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+    }
+
+    .hero {
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.76)),
+        radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.18), transparent 34%);
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.26);
+      padding: 30px;
+    }
+
+    .kicker {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      color: #bae6fd;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 8px 12px;
+    }
+
+    h1 {
+      margin: 0;
+      color: #ffffff;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 820px;
+      margin: 16px 0 0;
+      color: #cbd5e1;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.78);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+      padding: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      color: #ffffff;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .member-box {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.16);
+      border-radius: 8px;
+      background: rgba(2, 8, 23, 0.32);
+      padding: 12px;
+    }
+
+    .member-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .member-selected {
+      display: none;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      align-items: center;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .member-selected.visible {
+      display: grid;
+    }
+
+    .member-avatar {
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.24);
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+      font-weight: 900;
+    }
+
+    .member-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .member-selected strong {
+      display: block;
+      color: #ffffff;
+      font-size: 13px;
+    }
+
+    .member-note {
+      margin: 0;
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .file-hint {
+      margin: -2px 0 0;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .checkbox-label {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 8px;
+      background: rgba(2, 8, 23, 0.24);
+      padding: 0 10px;
+    }
+
+    .checkbox-label input {
+      width: 18px;
+      min-height: 18px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      background: rgba(2, 8, 23, 0.5);
+      color: #f8fafc;
+      outline: none;
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(56, 189, 248, 0.62);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+    }
+
+    input[type="color"] {
+      min-height: 42px;
+      padding: 4px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .button {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #cbd5e1;
+      cursor: pointer;
+      font-weight: 900;
+      padding: 0 14px;
+      text-decoration: none;
+    }
+
+    .button.primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, #0284c7, #0d9488);
+      color: #ffffff;
+    }
+
+    .button:hover {
+      border-color: rgba(80, 190, 255, 0.42);
+      color: #ffffff;
+    }
+
+    .preview-wrap {
+      overflow: auto;
+      border-radius: 8px;
+      background: #f6f8fb;
+      padding: 24px;
+    }
+
+    .preview-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .preview-title h2 {
+      margin: 0;
+    }
+
+    .status {
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: #5eead4;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .help {
+      margin-top: 14px;
+      border: 1px solid rgba(45, 212, 191, 0.22);
+      border-radius: 8px;
+      background: rgba(20, 184, 166, 0.08);
+      color: #cbd5e1;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .help strong {
+      color: #5eead4;
+    }
+
+    .raw-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .raw-links a {
+      color: #8bdcff;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media (max-width: 940px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        padding: 18px;
+      }
+
+      .hero,
+      .panel,
+      .preview-wrap {
+        padding: 18px;
+      }
+
+      .form-grid,
+      .actions,
+      .member-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="kicker">Gerador editável</div>
+      <h1>Assinaturas de e-mail</h1>
+      <p>
+        Escolha a empresa, edite os dados do colaborador e copie a assinatura pronta para colar no Gmail, Outlook ou webmail. O link preenchido pode ser enviado por e-mail para outra pessoa terminar a configuração.
+      </p>
+    </section>
+
+    <section class="layout">
+      <form class="panel" id="signature-form">
+        <h2>Dados da assinatura</h2>
+
+        <div class="form-grid">
+          <label class="wide">
+            Empresa
+            <select id="empresa" name="empresa">
+              <option value="acessa">Acessa Net</option>
+              <option value="projecta">Projecta Empreendimentos</option>
+              <option value="dias">Dias Gestão</option>
+            </select>
+          </label>
+
+          <div class="member-box">
+            <div class="member-row">
+              <label>
+                Selecionar membro do chat interno
+                <select id="membroChat" name="membroChat">
+                  <option value="">Carregando membros...</option>
+                </select>
+              </label>
+              <button class="button" type="button" id="reload-members">Atualizar lista</button>
+            </div>
+
+            <div class="member-selected" id="member-selected">
+              <div class="member-avatar" id="member-avatar">?</div>
+              <div>
+                <strong id="member-name">Nenhum membro selecionado</strong>
+                <span id="member-details">Escolha um colaborador para preencher os dados automaticamente.</span>
+              </div>
+            </div>
+
+            <p class="member-note" id="member-note">
+              Entre no chat interno neste navegador para carregar nome, e-mail, setor e foto de perfil.
+            </p>
+          </div>
+
+          <label class="wide">
+            Nome completo
+            <input id="nome" name="nome" type="text" autocomplete="name">
+          </label>
+
+          <label class="wide">
+            Cargo
+            <input id="cargo" name="cargo" type="text" autocomplete="organization-title">
+          </label>
+
+          <label>
+            Telefone / WhatsApp
+            <input id="telefone" name="telefone" type="text" inputmode="tel" autocomplete="tel">
+          </label>
+
+          <label>
+            E-mail
+            <input id="email" name="email" type="email" autocomplete="email">
+          </label>
+
+          <label class="wide">
+            Site
+            <input id="site" name="site" type="text" autocomplete="url">
+          </label>
+
+          <label class="wide">
+            Logo por URL pública HTTPS
+            <input id="logo" name="logo" type="url" autocomplete="url">
+          </label>
+
+          <label class="wide">
+            Foto do colaborador
+            <input id="fotoPerfil" name="fotoPerfil" type="text" placeholder="Use uma URL pública ou selecione um arquivo abaixo">
+          </label>
+
+          <label class="wide">
+            Enviar foto profissional
+            <input id="fotoUpload" name="fotoUpload" type="file" accept="image/png,image/jpeg,image/webp">
+            <span class="file-hint">A imagem enviada será recortada em formato quadrado e usada no lugar da logo.</span>
+          </label>
+
+          <label class="wide checkbox-label">
+            <input id="mostrarFotoPerfil" name="mostrarFotoPerfil" type="checkbox">
+            Usar foto de perfil no lugar da logo
+          </label>
+
+          <label class="wide">
+            Endereço
+            <input id="endereco" name="endereco" type="text" autocomplete="street-address">
+          </label>
+
+          <label>
+            Rede social 1 - nome
+            <input id="rede1Label" name="rede1Label" type="text">
+          </label>
+
+          <label>
+            Rede social 1 - link
+            <input id="rede1Url" name="rede1Url" type="url">
+          </label>
+
+          <label>
+            Rede social 2 - nome
+            <input id="rede2Label" name="rede2Label" type="text">
+          </label>
+
+          <label>
+            Rede social 2 - link
+            <input id="rede2Url" name="rede2Url" type="url">
+          </label>
+
+          <label>
+            Cor principal
+            <input id="corPrincipal" name="corPrincipal" type="color">
+          </label>
+
+          <label>
+            Cor secundária
+            <input id="corSecundaria" name="corSecundaria" type="color">
+          </label>
+
+          <label>
+            Cor de destaque
+            <input id="corDestaque" name="corDestaque" type="color">
+          </label>
+
+          <label>
+            Largura da logo
+            <input id="logoWidth" name="logoWidth" type="number" min="90" max="180" step="1">
+          </label>
+
+          <label class="wide">
+            Frase institucional
+            <textarea id="frase" name="frase"></textarea>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="button primary" type="button" id="copy-signature">Copiar assinatura</button>
+          <button class="button" type="button" id="copy-html">Copiar HTML</button>
+          <button class="button" type="button" id="copy-link">Copiar link preenchido</button>
+          <button class="button" type="button" id="email-link">Abrir e-mail com link</button>
+          <button class="button" type="button" id="download-html">Baixar HTML</button>
+          <button class="button" type="button" id="reset-model">Recarregar modelo</button>
+        </div>
+
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+
+        <div class="help">
+          <strong>Como enviar para alguém:</strong> preencha os dados e clique em "Copiar link preenchido" ou "Abrir e-mail com link". Quem receber abre o link, confere a prévia, clica em "Copiar assinatura" e cola no campo de assinatura do Gmail ou Outlook.
+        </div>
+      </form>
+
+      <section class="panel">
+        <div class="preview-title">
+          <h2>Prévia para copiar</h2>
+        </div>
+
+        <div class="preview-wrap">
+          <div id="signature-preview"></div>
+        </div>
+
+        <div class="raw-links">
+          <a href="acessa-net-assinatura.html" target="_blank" rel="noopener noreferrer">HTML base Acessa Net</a>
+          <a href="projecta-assinatura.html" target="_blank" rel="noopener noreferrer">HTML base Projecta</a>
+          <a href="dias-gestao-assinatura.html" target="_blank" rel="noopener noreferrer">HTML base Dias Gestão</a>
+          <a href="README.md" target="_blank" rel="noopener noreferrer">README</a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const assinaturaAssetUrl = (arquivo) => new URL(arquivo, window.location.href).toString();
+
+    const modelos = {
+      acessa: {
+        empresaNome: 'Acessa Net',
+        nome: 'NOME DO COLABORADOR',
+        cargo: 'CARGO DO COLABORADOR',
+        telefone: '0800 444 5799',
+        email: 'email@acessanet.com.br',
+        site: 'www.acessanet.com.br',
+        siteHref: 'https://www.acessanet.com.br',
+        logo: assinaturaAssetUrl('acessa-net-logo.png'),
+        endereco: '',
+        rede1Label: 'Instagram',
+        rede1Url: 'https://www.instagram.com/acessanet_',
+        rede2Label: '',
+        rede2Url: '',
+        corPrincipal: '#0878D9',
+        corSecundaria: '#0F172A',
+        corDestaque: '#22BFFF',
+        logoWidth: 132,
+        frase: 'Internet de qualidade para conectar pessoas, empresas e oportunidades.',
+      },
+      projecta: {
+        empresaNome: 'Projecta Empreendimentos',
+        nome: 'NOME DO COLABORADOR',
+        cargo: 'CARGO DO COLABORADOR',
+        telefone: '(00) 00000-0000',
+        email: 'email@projecta.com.br',
+        site: 'www.projectaempreendimentos.com.br',
+        siteHref: 'https://www.projectaempreendimentos.com.br',
+        logo: assinaturaAssetUrl('projecta-logo.png'),
+        endereco: '',
+        rede1Label: 'Instagram',
+        rede1Url: 'https://www.instagram.com/projectaempreendimentos',
+        rede2Label: 'LinkedIn',
+        rede2Url: 'https://www.linkedin.com/company/projecta-empreendimentos',
+        corPrincipal: '#0F2E4D',
+        corSecundaria: '#6B7280',
+        corDestaque: '#1D4ED8',
+        logoWidth: 150,
+        frase: 'Soluções imobiliárias com confiança e profissionalismo.',
+      },
+      dias: {
+        empresaNome: 'Dias Gestão',
+        nome: 'NOME DO COLABORADOR',
+        cargo: 'CARGO DO COLABORADOR',
+        telefone: '(00) 00000-0000',
+        email: 'email@diasgestao.com.br',
+        site: 'www.diasgestao.com.br',
+        siteHref: 'https://www.diasgestao.com.br',
+        logo: assinaturaAssetUrl('dias-gestao-logo.png'),
+        endereco: '',
+        rede1Label: 'Instagram',
+        rede1Url: 'https://www.instagram.com/diasgestao',
+        rede2Label: 'LinkedIn',
+        rede2Url: 'https://www.linkedin.com/company/dias-gestao',
+        corPrincipal: '#0E4B55',
+        corSecundaria: '#30343B',
+        corDestaque: '#1F8A9B',
+        logoWidth: 128,
+        frase: 'Gestão estratégica com eficiência e credibilidade.',
+      },
+    };
+
+    const campos = [
+      'empresa',
+      'nome',
+      'cargo',
+      'telefone',
+      'email',
+      'site',
+      'logo',
+      'fotoPerfil',
+      'mostrarFotoPerfil',
+      'endereco',
+      'rede1Label',
+      'rede1Url',
+      'rede2Label',
+      'rede2Url',
+      'corPrincipal',
+      'corSecundaria',
+      'corDestaque',
+      'logoWidth',
+      'frase',
+    ];
+
+    const form = document.getElementById('signature-form');
+    const preview = document.getElementById('signature-preview');
+    const statusEl = document.getElementById('status');
+    const membroChatSelect = document.getElementById('membroChat');
+    const fotoUploadInput = document.getElementById('fotoUpload');
+    const memberSelected = document.getElementById('member-selected');
+    const memberAvatar = document.getElementById('member-avatar');
+    const memberName = document.getElementById('member-name');
+    const memberDetails = document.getElementById('member-details');
+    const memberNote = document.getElementById('member-note');
+    let membrosChat = [];
+
+    const getCampo = (campo) => document.getElementById(campo);
+
+    const escapeHtml = (valor) => String(valor || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    const normalizarUrl = (valor) => {
+      const texto = String(valor || '').trim();
+      if (!texto) return '';
+      if (/^(https?:|mailto:|tel:)/i.test(texto)) return texto;
+      return `https://${texto}`;
+    };
+
+    const telefoneHref = (valor) => {
+      const digitos = String(valor || '').replace(/\D/g, '');
+      if (!digitos) return '';
+      return digitos.startsWith('55') ? `+${digitos}` : `+55${digitos}`;
+    };
+
+    const textoPlano = (dados) => [
+      dados.nome,
+      dados.cargo,
+      dados.telefone,
+      dados.email,
+      dados.site,
+      dados.endereco,
+      dados.frase,
+    ].filter(Boolean).join('\n');
+
+    const obterDados = () => {
+      const dados = {};
+      campos.forEach((campo) => {
+        const elemento = getCampo(campo);
+        dados[campo] = elemento.type === 'checkbox' ? elemento.checked : elemento.value.trim();
+      });
+      dados.empresaNome = modelos[dados.empresa]?.empresaNome || 'Empresa';
+      dados.siteHref = normalizarUrl(dados.site);
+      dados.logoWidth = Math.min(180, Math.max(90, Number(dados.logoWidth) || 132));
+      return dados;
+    };
+
+    const socialHtml = (label, url) => {
+      if (!label || !url) return '';
+      return `<a href="${escapeHtml(normalizarUrl(url))}" target="_blank" style="color:#374151; text-decoration:none;">${escapeHtml(label)}</a>`;
+    };
+
+    const iconesContato = {
+      telefone: '&#9742;',
+      email: '&#9993;',
+      site: '&#127760;',
+      rede: '&#9678;',
+      endereco: '&#8982;',
+    };
+
+    const linhaContato = (icone, html, cor) => {
+      if (!html) return '';
+      return `
+        <tr>
+          <td width="24" valign="top" style="width:24px; color:${escapeHtml(cor)}; font-size:13px; line-height:19px; font-weight:700; text-align:center;">${icone}</td>
+          <td valign="top">${html}</td>
+        </tr>
+      `;
+    };
+
+    const montarAssinatura = (dados) => {
+      const siteHref = normalizarUrl(dados.siteHref || dados.site);
+      const telHref = telefoneHref(dados.telefone);
+      const imagemEsquerdaHtml = dados.mostrarFotoPerfil && dados.fotoPerfil
+        ? `<img src="${escapeHtml(dados.fotoPerfil)}" width="118" height="118" alt="${escapeHtml(dados.nome)}" style="display:block; width:118px; height:118px; object-fit:cover; border:0; border-radius:8px; outline:none; text-decoration:none;">`
+        : dados.logo
+        ? `<img src="${escapeHtml(dados.logo)}" width="${dados.logoWidth}" alt="${escapeHtml(dados.empresaNome)}" style="display:block; width:${dados.logoWidth}px; max-width:${dados.logoWidth}px; height:auto; border:0; outline:none; text-decoration:none;">`
+        : `<div style="font-size:18px; line-height:22px; font-weight:700; color:${escapeHtml(dados.corPrincipal)};">${escapeHtml(dados.empresaNome)}</div>`;
+
+      const rede1 = socialHtml(dados.rede1Label, dados.rede1Url);
+      const rede2 = socialHtml(dados.rede2Label, dados.rede2Url);
+      const redes = [rede1, rede2].filter(Boolean).join('<span style="color:#9CA3AF;"> | </span>');
+
+      return `
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px; border-collapse:collapse; font-family:Arial, Helvetica, sans-serif; color:#1f2937; background:#ffffff;">
+          <tr>
+            <td style="padding:0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+                <tr>
+                  <td width="158" valign="middle" style="width:158px; padding:0 20px 0 0; vertical-align:middle; text-align:left;">
+                    <a href="${escapeHtml(siteHref)}" target="_blank" style="text-decoration:none;">
+                      ${imagemEsquerdaHtml}
+                    </a>
+                    <div style="margin-top:10px; font-size:12px; line-height:16px; font-weight:700; color:${escapeHtml(dados.corPrincipal)};">
+                      ${escapeHtml(dados.empresaNome)}
+                    </div>
+                  </td>
+                  <td width="1" style="width:1px; background:#D8DEE6; font-size:0; line-height:0;">&nbsp;</td>
+                  <td valign="middle" style="padding:0 0 0 20px; vertical-align:middle;">
+                    <div style="font-size:20px; line-height:24px; font-weight:700; color:${escapeHtml(dados.corPrincipal)};">
+                      ${escapeHtml(dados.nome)}
+                    </div>
+                    <div style="margin-top:3px; font-size:13px; line-height:18px; color:${escapeHtml(dados.corSecundaria)}; font-weight:600;">
+                      ${escapeHtml(dados.cargo)}
+                    </div>
+                    <div style="height:12px; line-height:12px; font-size:12px;">&nbsp;</div>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; font-size:13px; line-height:19px; color:#374151;">
+                      ${linhaContato(iconesContato.telefone, telHref ? `<a href="tel:${escapeHtml(telHref)}" style="color:#374151; text-decoration:none;">${escapeHtml(dados.telefone)}</a>` : '', dados.corDestaque)}
+                      ${linhaContato(iconesContato.email, dados.email ? `<a href="mailto:${escapeHtml(dados.email)}" style="color:#374151; text-decoration:none;">${escapeHtml(dados.email)}</a>` : '', dados.corDestaque)}
+                      ${linhaContato(iconesContato.site, dados.site ? `<a href="${escapeHtml(siteHref)}" target="_blank" style="color:${escapeHtml(dados.corPrincipal)}; text-decoration:none; font-weight:700;">${escapeHtml(dados.site)}</a>` : '', dados.corDestaque)}
+                      ${linhaContato(iconesContato.rede, redes, dados.corDestaque)}
+                      ${linhaContato(iconesContato.endereco, dados.endereco ? `<span style="color:#374151;">${escapeHtml(dados.endereco)}</span>` : '', dados.corDestaque)}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ${dados.frase ? `
+          <tr>
+            <td style="padding-top:14px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB; padding-top:10px; font-size:11px; line-height:16px; color:${escapeHtml(dados.corSecundaria)};">
+                    ${escapeHtml(dados.frase)}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+        </table>
+      `;
+    };
+
+    const renderizar = () => {
+      const dados = obterDados();
+      preview.innerHTML = montarAssinatura(dados);
+      return dados;
+    };
+
+    const preencherModelo = (empresa) => {
+      const modelo = modelos[empresa] || modelos.acessa;
+      getCampo('empresa').value = empresa;
+      Object.entries(modelo).forEach(([campo, valor]) => {
+        if (getCampo(campo)) {
+          const elemento = getCampo(campo);
+          if (elemento.type === 'checkbox') {
+            elemento.checked = Boolean(valor);
+          } else {
+            elemento.value = valor;
+          }
+        }
+      });
+      getCampo('fotoPerfil').value = '';
+      getCampo('mostrarFotoPerfil').checked = false;
+      membroChatSelect.value = '';
+      atualizarResumoMembro(null);
+      renderizar();
+    };
+
+    const gerarHash = () => {
+      const dados = obterDados();
+      const params = new URLSearchParams();
+      campos.forEach((campo) => {
+        if (campo === 'fotoPerfil' && String(dados[campo] || '').startsWith('data:')) return;
+        if (typeof dados[campo] === 'boolean') {
+          if (dados[campo]) params.set(campo, '1');
+          return;
+        }
+        if (dados[campo]) params.set(campo, dados[campo]);
+      });
+      return params.toString();
+    };
+
+    const gerarLink = () => {
+      const url = new URL(window.location.href);
+      url.hash = gerarHash();
+      return url.toString();
+    };
+
+    const aplicarHash = () => {
+      if (!window.location.hash) {
+        preencherModelo('acessa');
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      const empresa = params.get('empresa') || 'acessa';
+      preencherModelo(modelos[empresa] ? empresa : 'acessa');
+      campos.forEach((campo) => {
+        const valor = params.get(campo);
+        if (valor !== null && getCampo(campo)) {
+          const elemento = getCampo(campo);
+          if (elemento.type === 'checkbox') {
+            elemento.checked = valor === '1' || valor === 'true';
+          } else {
+            elemento.value = valor;
+          }
+        }
+      });
+      renderizar();
+    };
+
+    const obterApiBaseUrl = () => {
+      const origem = window.location.origin;
+      if (/:(5173|5174|3000)$/.test(window.location.host)) {
+        return `${window.location.protocol}//${window.location.hostname}:8600/api`;
+      }
+      return `${origem}/api`;
+    };
+
+    const buscarJson = async (url, options = {}) => {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 12000);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+        let data = null;
+
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+
+        if (!response.ok) {
+          throw new Error(data?.error || 'Falha ao carregar dados do chat.');
+        }
+
+        return data;
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    };
+
+    const normalizarRespostaUsuarios = (resposta) => {
+      if (Array.isArray(resposta)) return resposta;
+      if (Array.isArray(resposta?.usuarios)) return resposta.usuarios;
+      if (Array.isArray(resposta?.data)) return resposta.data;
+      return [];
+    };
+
+    const iniciais = (nome = '') => String(nome)
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((parte) => parte[0])
+      .join('')
+      .toUpperCase() || '?';
+
+    const atualizarResumoMembro = (membro) => {
+      if (!membro) {
+        memberSelected.classList.remove('visible');
+        memberAvatar.textContent = '?';
+        memberName.textContent = 'Nenhum membro selecionado';
+        memberDetails.textContent = 'Escolha um colaborador para preencher os dados automaticamente.';
+        return;
+      }
+
+      memberSelected.classList.add('visible');
+      memberAvatar.innerHTML = membro.avatar
+        ? `<img src="${escapeHtml(membro.avatar)}" alt="">`
+        : escapeHtml(iniciais(membro.nome));
+      memberName.textContent = membro.nome || 'Colaborador';
+      memberDetails.textContent = [membro.email, membro.setor_nome].filter(Boolean).join(' · ') || 'Dados carregados do chat interno.';
+    };
+
+    const preencherSelectMembros = (usuarios = []) => {
+      membrosChat = usuarios;
+      membroChatSelect.innerHTML = '<option value="">Selecionar colaborador...</option>';
+
+      usuarios.forEach((usuario) => {
+        const option = document.createElement('option');
+        option.value = String(usuario.id);
+        option.textContent = `${usuario.nome || 'Sem nome'}${usuario.setor_nome ? ` - ${usuario.setor_nome}` : ''}${usuario.email ? ` (${usuario.email})` : ''}`;
+        membroChatSelect.appendChild(option);
+      });
+    };
+
+    const carregarMembrosChat = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        membroChatSelect.innerHTML = '<option value="">Faça login no chat para carregar membros</option>';
+        memberNote.textContent = 'Não encontrei token do chat neste navegador. Abra esta página pelo chat interno logado.';
+        return;
+      }
+
+      membroChatSelect.innerHTML = '<option value="">Carregando membros...</option>';
+
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [me, usuariosResposta] = await Promise.all([
+          buscarJson(`${obterApiBaseUrl()}/me`, { headers }),
+          buscarJson(`${obterApiBaseUrl()}/chat/usuarios`, { headers }),
+        ]);
+        const usuarios = normalizarRespostaUsuarios(usuariosResposta);
+        const mapa = new Map();
+
+        [me, ...usuarios].forEach((usuario) => {
+          if (usuario?.id) mapa.set(String(usuario.id), usuario);
+        });
+
+        const lista = Array.from(mapa.values()).sort((a, b) => (
+          String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR')
+        ));
+
+        preencherSelectMembros(lista);
+        memberNote.textContent = lista.length
+          ? `${lista.length} membro(s) carregado(s). Ao selecionar, nome, e-mail, setor e foto serão preenchidos.`
+          : 'Nenhum membro foi encontrado para sua empresa.';
+      } catch (err) {
+        console.error(err);
+        membroChatSelect.innerHTML = '<option value="">Não foi possível carregar membros</option>';
+        memberNote.textContent = err?.name === 'AbortError'
+          ? 'A busca demorou demais. Verifique sua conexão e tente atualizar a lista.'
+          : 'Não foi possível carregar os membros. Verifique se o backend está ativo e se você está logado.';
+      }
+    };
+
+    const aplicarMembroSelecionado = () => {
+      const membro = membrosChat.find((usuario) => String(usuario.id) === String(membroChatSelect.value));
+      if (!membro) {
+        atualizarResumoMembro(null);
+        return;
+      }
+
+      getCampo('nome').value = membro.nome || '';
+      getCampo('email').value = membro.email || '';
+      getCampo('cargo').value = membro.cargo || membro.cargo_nome || membro.setor_nome || getCampo('cargo').value;
+      getCampo('fotoPerfil').value = membro.avatar || '';
+      getCampo('mostrarFotoPerfil').checked = Boolean(membro.avatar);
+      atualizarResumoMembro(membro);
+      renderizar();
+      mostrarStatus('Dados do membro aplicados. Revise cargo, telefone e demais campos antes de copiar.');
+    };
+
+    const carregarImagem = (src) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+
+    const lerArquivoComoDataUrl = (arquivo) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(arquivo);
+    });
+
+    const criarFotoQuadrada = async (arquivo) => {
+      const dataUrl = await lerArquivoComoDataUrl(arquivo);
+      const img = await carregarImagem(dataUrl);
+      const tamanhoOrigem = Math.min(img.naturalWidth || img.width, img.naturalHeight || img.height);
+      const origemX = ((img.naturalWidth || img.width) - tamanhoOrigem) / 2;
+      const origemY = ((img.naturalHeight || img.height) - tamanhoOrigem) / 2;
+      const canvas = document.createElement('canvas');
+      const tamanhoFinal = 360;
+      canvas.width = tamanhoFinal;
+      canvas.height = tamanhoFinal;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, origemX, origemY, tamanhoOrigem, tamanhoOrigem, 0, 0, tamanhoFinal, tamanhoFinal);
+      return canvas.toDataURL('image/jpeg', 0.88);
+    };
+
+    const aplicarFotoEnviada = async () => {
+      const arquivo = fotoUploadInput.files?.[0];
+      if (!arquivo) return;
+
+      if (!arquivo.type.startsWith('image/')) {
+        mostrarStatus('Selecione um arquivo de imagem válido.');
+        fotoUploadInput.value = '';
+        return;
+      }
+
+      if (arquivo.size > 8 * 1024 * 1024) {
+        mostrarStatus('A foto é muito grande. Use uma imagem com até 8 MB.');
+        fotoUploadInput.value = '';
+        return;
+      }
+
+      try {
+        const fotoQuadrada = await criarFotoQuadrada(arquivo);
+        getCampo('fotoPerfil').value = fotoQuadrada;
+        getCampo('mostrarFotoPerfil').checked = true;
+        renderizar();
+        mostrarStatus('Foto enviada e aplicada no lugar da logo.');
+      } catch (err) {
+        console.error(err);
+        mostrarStatus('Não foi possível carregar essa foto. Tente outro arquivo.');
+      }
+    };
+
+    const mostrarStatus = (mensagem) => {
+      statusEl.textContent = mensagem;
+      window.clearTimeout(mostrarStatus.timer);
+      mostrarStatus.timer = window.setTimeout(() => {
+        statusEl.textContent = '';
+      }, 4200);
+    };
+
+    const copiarTextoFallback = (texto) => {
+      const textarea = document.createElement('textarea');
+      textarea.value = texto;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    };
+
+    const copiarTexto = async (texto) => {
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(texto);
+          return;
+        }
+      } catch (err) {
+        console.warn('Clipboard API indisponivel, usando fallback.', err);
+      }
+
+      copiarTextoFallback(texto);
+    };
+
+    const copiarPreviewFallback = () => {
+      const range = document.createRange();
+      range.selectNodeContents(preview);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      document.execCommand('copy');
+      selection.removeAllRanges();
+    };
+
+    const copiarAssinatura = async () => {
+      const dados = renderizar();
+      const html = preview.innerHTML;
+
+      try {
+        if (navigator.clipboard?.write && window.ClipboardItem) {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': new Blob([html], { type: 'text/html' }),
+              'text/plain': new Blob([textoPlano(dados)], { type: 'text/plain' }),
+            }),
+          ]);
+        } else {
+          copiarPreviewFallback();
+        }
+
+        mostrarStatus('Assinatura copiada. Agora cole no campo de assinatura do Gmail, Outlook ou webmail.');
+      } catch (err) {
+        console.error(err);
+        try {
+          copiarPreviewFallback();
+          mostrarStatus('Assinatura copiada. Agora cole no campo de assinatura do Gmail, Outlook ou webmail.');
+        } catch (fallbackErr) {
+          console.error(fallbackErr);
+          mostrarStatus('Não foi possível copiar automaticamente. Selecione a prévia manualmente e copie com Ctrl+C.');
+        }
+      }
+    };
+
+    const baixarHtml = () => {
+      const dados = renderizar();
+      const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Assinatura - ${escapeHtml(dados.empresaNome)}</title></head><body style="margin:0; padding:24px; background:#f6f8fb;">${preview.innerHTML}</body></html>`;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `assinatura-${dados.empresa || 'email'}.html`;
+      document.body.appendChild(link);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+      mostrarStatus('Arquivo HTML gerado.');
+    };
+
+    getCampo('empresa').addEventListener('change', (event) => {
+      preencherModelo(event.target.value);
+    });
+
+    form.addEventListener('input', renderizar);
+    membroChatSelect.addEventListener('change', aplicarMembroSelecionado);
+    fotoUploadInput.addEventListener('change', aplicarFotoEnviada);
+    document.getElementById('reload-members').addEventListener('click', carregarMembrosChat);
+
+    document.getElementById('reset-model').addEventListener('click', () => {
+      preencherModelo(getCampo('empresa').value);
+      mostrarStatus('Modelo recarregado.');
+    });
+
+    document.getElementById('copy-signature').addEventListener('click', copiarAssinatura);
+
+    document.getElementById('copy-html').addEventListener('click', async () => {
+      renderizar();
+      await copiarTexto(preview.innerHTML);
+      mostrarStatus('HTML da assinatura copiado.');
+    });
+
+    document.getElementById('copy-link').addEventListener('click', async () => {
+      await copiarTexto(gerarLink());
+      mostrarStatus('Link preenchido copiado. Envie esse link para a pessoa abrir e copiar a assinatura.');
+    });
+
+    document.getElementById('email-link').addEventListener('click', () => {
+      const dados = obterDados();
+      const assunto = encodeURIComponent(`Assinatura de e-mail - ${dados.empresaNome}`);
+      const corpo = encodeURIComponent(`Olá,\n\nAbra este link para revisar e copiar sua assinatura de e-mail:\n\n${gerarLink()}\n\nDepois clique em "Copiar assinatura" e cole no Gmail, Outlook ou webmail.`);
+      window.location.href = `mailto:?subject=${assunto}&body=${corpo}`;
+    });
+
+    document.getElementById('download-html').addEventListener('click', baixarHtml);
+
+    aplicarHash();
+    carregarMembrosChat();
+  </script>
+</body>
+</html>

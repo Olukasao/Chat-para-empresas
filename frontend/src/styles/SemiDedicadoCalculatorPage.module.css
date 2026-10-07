@@ -1,0 +1,50 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.18), transparent 32%),
+    linear-gradient(135deg, #07111f 0%, #0f172a 52%, #06211c 100%);
+  color: #f8fafc;
+  padding: 28px;
+}
+
+.shell {
+  width: min(960px, 100%);
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.backButton {
+  width: fit-content;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.68);
+  color: #e0f2fe;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  padding: 0 14px;
+}
+
+.backButton:hover,
+.backButton:focus-visible {
+  border-color: rgba(125, 211, 252, 0.48);
+  background: rgba(14, 165, 233, 0.16);
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 16px;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

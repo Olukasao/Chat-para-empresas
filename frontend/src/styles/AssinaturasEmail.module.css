@@ -1,0 +1,208 @@
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  background:
+    radial-gradient(circle at 14% 12%, rgba(14, 75, 85, 0.2), transparent 30%),
+    radial-gradient(circle at 86% 10%, rgba(29, 78, 216, 0.14), transparent 28%),
+    linear-gradient(135deg, #061425 0%, #08111f 48%, #0f172a 100%);
+  color: #f8fafc;
+}
+
+.shell {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+}
+
+.backButton,
+.primaryButton,
+.secondaryButton {
+  border: 0;
+  font-family: inherit;
+}
+
+.backButton {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(80, 190, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px 14px;
+}
+
+.backButton:hover {
+  border-color: rgba(80, 190, 255, 0.46);
+  color: #ffffff;
+}
+
+.hero {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.76)),
+    radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.18), transparent 34%);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.26);
+  padding: 34px;
+}
+
+.hero > span {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.1);
+  color: #bae6fd;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.hero h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.hero p {
+  max-width: 780px;
+  margin: 16px 0 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.infoBox,
+.restricted,
+.readmeBox,
+.createPanel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #dbeafe;
+  padding: 18px;
+}
+
+.infoBox svg,
+.restricted svg {
+  color: #5eead4;
+  flex-shrink: 0;
+}
+
+.infoBox p,
+.restricted p,
+.readmeBox p,
+.createPanel p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.restricted {
+  border-color: rgba(248, 113, 113, 0.24);
+}
+
+.restricted svg {
+  color: #fca5a5;
+}
+
+.restricted h2,
+.readmeBox strong,
+.createPanel strong {
+  display: block;
+  margin: 0 0 4px;
+  color: #ffffff;
+  font-size: 17px;
+}
+
+.primaryButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0284c7, #0d9488);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 0 14px;
+}
+
+.createPanel {
+  justify-content: space-between;
+  border-color: rgba(56, 189, 248, 0.24);
+}
+
+.createPanel > div {
+  flex: 1 1 360px;
+}
+
+.readmeBox {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.readmeBox > div {
+  flex: 1 1 360px;
+}
+
+.secondaryButton {
+  min-height: 42px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 0 16px;
+}
+
+.secondaryButton:hover {
+  border-color: rgba(80, 190, 255, 0.42);
+  color: #ffffff;
+}
+
+.permissionHint {
+  margin: 16px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 18px;
+  }
+
+  .hero {
+    padding: 24px;
+  }
+
+  .infoBox,
+  .restricted,
+  .readmeBox,
+  .createPanel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .backButton,
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}

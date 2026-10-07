@@ -1,0 +1,50 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.crt
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+*.log
+logs/
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build/test output
+dist/
+frontend/dist/
+backend/dist/
+coverage/
+test-results/
+playwright-report/
+
+# Runtime/user-generated data
+uploads/
+backups/
+frontend/public/sounds/custom/
+
+# Local agent/editor state
+.agents/
+.claude/
+.codex/
+.kilo/
+.kilocode/
+backend/.agents/
+backend/.codex/
+backend/.git/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.local
+*.sw?

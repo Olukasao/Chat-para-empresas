@@ -1,0 +1,319 @@
+.alertFireIcon,
+.alertFireIcon * {
+  box-sizing: border-box;
+}
+
+.alertFireIcon {
+  width: 54px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  color: #f97316;
+}
+
+.alertFireIconSvg {
+  width: 58px;
+  height: 64px;
+  display: block;
+  overflow: visible;
+}
+
+.alertFireIconSvg * {
+  transform-box: fill-box;
+}
+
+.alertFireGlowShape {
+  opacity: 0;
+  transform-origin: center;
+  fill: rgba(249, 115, 22, 0.16);
+}
+
+.alertFireSmokeLine {
+  stroke: rgba(171, 194, 210, 0.38);
+  stroke-width: 2.3;
+  stroke-dasharray: 19 18;
+  stroke-dashoffset: 30;
+  opacity: 0;
+  filter: none;
+  animation: alertFireSmokeFlow 4.3s ease-in-out infinite;
+}
+
+.alertFireSmokeLineTwo {
+  animation-delay: 1.05s;
+}
+
+.alertFireSmokeLineThree {
+  stroke-width: 1.8;
+  animation-delay: 2.1s;
+}
+
+.alertFireSparks {
+  opacity: 0;
+}
+
+.alertFireSpark {
+  fill: #fed7aa;
+  opacity: 0;
+  transform-origin: center;
+  filter: drop-shadow(0 0 3px rgba(251, 146, 60, 0.8));
+  animation: alertFireSparkRise 2.35s ease-out infinite;
+}
+
+.alertFireSparkTwo {
+  animation-delay: 0.48s;
+}
+
+.alertFireSparkThree {
+  animation-delay: 1.02s;
+}
+
+.alertFireSparkFour {
+  animation-delay: 1.52s;
+}
+
+.alertFireFlames {
+  opacity: 0;
+  transform-origin: center bottom;
+}
+
+.alertFireFlame {
+  transform-origin: center bottom;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 0.45;
+}
+
+.alertFireFlameOuter {
+  fill: #c7331f;
+  animation: alertFireOuterFlicker 1.35s ease-in-out infinite;
+}
+
+.alertFireFlameMiddle {
+  fill: #f97316;
+  animation: alertFireMiddleFlicker 1.08s ease-in-out infinite;
+}
+
+.alertFireFlameInner {
+  fill: #fde68a;
+  animation: alertFireInnerFlicker 0.92s ease-in-out infinite;
+}
+
+.alertFireCoals path {
+  fill: #29211d;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 0.5;
+}
+
+.alertFireLogs {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.28));
+}
+
+.alertFireLog {
+  fill: #5a2a1f;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 0.8;
+}
+
+.alertFireLogBack {
+  fill: #3f241c;
+}
+
+.alertFireLogFront {
+  fill: #6d3022;
+}
+
+.alertFireLogCut {
+  fill: #8a4b2e;
+  stroke: rgba(255, 229, 199, 0.22);
+  stroke-width: 0.8;
+}
+
+.alertFireLogLine {
+  fill: none;
+  stroke: rgba(255, 218, 185, 0.22);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+
+.alertFireIcon-yellow .alertFireSmokeLine {
+  animation-duration: 4.8s;
+}
+
+.alertFireIcon-yellow .alertFireCoals path {
+  fill: #211d1b;
+}
+
+.alertFireIcon-yellow .alertFireLog {
+  fill: #39231d;
+}
+
+.alertFireIcon-yellow .alertFireLogFront {
+  fill: #4b281e;
+}
+
+.alertFireIcon-yellow .alertFireGlowShape {
+  opacity: 0.28;
+  fill: rgba(148, 123, 83, 0.1);
+}
+
+.alertFireIcon-red {
+  animation: alertFireIconWarmth 1.9s ease-in-out infinite;
+}
+
+.alertFireIcon-red .alertFireGlowShape {
+  opacity: 0.72;
+  animation: alertFireGlowPulse 1.9s ease-in-out infinite;
+}
+
+.alertFireIcon-red .alertFireFlames,
+.alertFireIcon-red .alertFireSparks {
+  opacity: 1;
+}
+
+.alertFireIcon-red .alertFireSmokeLine {
+  stroke: rgba(255, 218, 190, 0.16);
+  stroke-width: 1.6;
+  animation-duration: 3.9s;
+}
+
+.alertFireIcon-red .alertFireCoals path {
+  fill: #601d17;
+  animation: alertFireCoalPulse 1.55s ease-in-out infinite;
+}
+
+.alertFireIcon-red .alertFireCoals path:nth-child(2) {
+  animation-delay: 0.35s;
+}
+
+.alertFireIcon-red .alertFireCoals path:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+@keyframes alertFireSmokeFlow {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 30;
+    transform: translate3d(0, 7px, 0) scale(0.96);
+  }
+  24% {
+    opacity: 0.68;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: -6;
+    transform: translate3d(2px, -8px, 0) scale(1.04);
+  }
+}
+
+@keyframes alertFireOuterFlicker {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1, 1);
+  }
+  44% {
+    transform: translate3d(-0.8px, -1.6px, 0) scale(0.98, 1.05);
+  }
+  70% {
+    transform: translate3d(0.8px, -0.8px, 0) scale(1.02, 0.98);
+  }
+}
+
+@keyframes alertFireMiddleFlicker {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0.7px, -1.8px, 0) scale(0.94, 1.07);
+  }
+}
+
+@keyframes alertFireInnerFlicker {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  48% {
+    transform: translate3d(-0.5px, -1.3px, 0) scale(0.9, 1.1);
+  }
+}
+
+@keyframes alertFireSparkRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 5px, 0) scale(0.7);
+  }
+  18% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--spark-drift, 4px), -16px, 0) scale(0.45);
+  }
+}
+
+.alertFireSparkOne {
+  --spark-drift: -8px;
+}
+
+.alertFireSparkTwo {
+  --spark-drift: 7px;
+}
+
+.alertFireSparkThree {
+  --spark-drift: -3px;
+}
+
+.alertFireSparkFour {
+  --spark-drift: 5px;
+}
+
+@keyframes alertFireGlowPulse {
+  0%, 100% {
+    opacity: 0.42;
+    transform: scale(0.92, 0.86);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.03, 0.95);
+  }
+}
+
+@keyframes alertFireIconWarmth {
+  0%, 100% {
+    filter: drop-shadow(0 0 0 rgba(249, 115, 22, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.2));
+  }
+}
+
+@keyframes alertFireCoalPulse {
+  0%, 100% {
+    filter: brightness(0.9);
+  }
+  50% {
+    filter: brightness(1.45);
+  }
+}
+
+@media (max-width: 620px) {
+  .alertFireIcon {
+    width: 50px;
+    height: 58px;
+  }
+
+  .alertFireIconSvg {
+    width: 54px;
+    height: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alertFireIcon,
+  .alertFireIcon-red,
+  .alertFireGlowShape,
+  .alertFireSmokeLine,
+  .alertFireSpark,
+  .alertFireFlame,
+  .alertFireCoals path {
+    animation: none !important;
+  }
+}

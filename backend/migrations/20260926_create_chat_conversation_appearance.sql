@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS chat_conversation_appearance (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  tipo ENUM('direta','grupo') NOT NULL,
+  referencia_id INT NOT NULL,
+  wallpaper_type ENUM('none','preset','upload','color','gradient') NOT NULL DEFAULT 'none',
+  wallpaper_url VARCHAR(500) NULL,
+  wallpaper_color CHAR(7) NULL,
+  wallpaper_color2 CHAR(7) NULL,
+  wallpaper_angle SMALLINT UNSIGNED NOT NULL DEFAULT 135,
+  wallpaper_mode ENUM('cover','contain','repeat') NOT NULL DEFAULT 'cover',
+  background_color CHAR(7) NULL,
+  own_message_color CHAR(7) NULL,
+  received_message_color CHAR(7) NULL,
+  accent_color CHAR(7) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_chat_conversation_appearance (user_id, tipo, referencia_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

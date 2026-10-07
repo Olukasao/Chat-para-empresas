@@ -1,0 +1,31 @@
+[Unit]
+Description=Chat Interno
+Documentation=file:/home/noc/chat-interno/VM_ALWAYS_ON.md
+After=network-online.target mysql.service
+Wants=network-online.target mysql.service
+
+[Service]
+Type=simple
+User=noc
+Group=noc
+WorkingDirectory=/home/noc/chat-interno/backend
+EnvironmentFile=/etc/chat-interno/chat-interno.env
+Environment=NODE_ENV=production
+Environment=HOST=0.0.0.0
+Environment=PORT=8600
+Environment=DB_HOST=localhost
+Environment=DB_PORT=3306
+Environment=DB_USER=chat
+Environment=DB_NAME=chat_interno
+Environment=ATENDIMENTO_SSO_REDIRECT_ORIGINS=http://192.168.1.133:9520,http://localhost:9520,http://127.0.0.1:9520,http://localhost:5173,http://127.0.0.1:5173,https://atendimento.acessanet.com.br
+Environment=ATENDIMENTO_SSO_CODE_TTL_MS=60000
+ExecStart=/usr/local/bin/node src/server.js
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,308 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.sideColumn {
+  display: grid;
+  gap: 16px;
+}
+
+.successBox {
+  margin-bottom: 14px;
+  border: 1px solid rgba(22, 163, 74, 0.22);
+  border-radius: 8px;
+  background: #ecfdf3;
+  color: #166534;
+  padding: 12px 14px;
+  font-weight: 800;
+}
+
+.subjectTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.subjectTabs button,
+.subjectList button {
+  font: inherit;
+}
+
+.subjectTabs button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #17202a;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0 12px;
+}
+
+.activeTab {
+  border-color: rgba(15, 118, 110, 0.34) !important;
+  background: #ccfbf1 !important;
+  color: #0f766e !important;
+}
+
+.searchBox {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f766e;
+  padding: 0 12px;
+}
+
+.searchBox input {
+  width: 100%;
+  height: 42px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #17202a;
+  font: inherit;
+}
+
+.permissionGrid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.42fr) minmax(0, 0.58fr);
+  gap: 14px;
+}
+
+.subjectList {
+  max-height: 680px;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.subjectList button {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17202a;
+  cursor: pointer;
+  text-align: left;
+  padding: 11px;
+}
+
+.subjectList button:hover,
+.subjectActive {
+  border-color: rgba(15, 118, 110, 0.38) !important;
+  background: #f0fdfa !important;
+}
+
+.subjectList span,
+.subjectList em,
+.subjectList small {
+  color: #5f6b7a;
+  font-size: 12px;
+}
+
+.subjectList small {
+  width: fit-content;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 3px 7px;
+  font-weight: 800;
+}
+
+.permissionPanel {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.selectedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.selectedHeader span {
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.selectedHeader h3 {
+  margin: 3px 0 0;
+  font-size: 18px;
+}
+
+.blockToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.profileSelect {
+  display: grid;
+  gap: 6px;
+  color: #5f6b7a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.profileSelect select,
+.profileSelect input,
+.profileSelect textarea {
+  min-height: 42px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17202a;
+  font: inherit;
+  padding: 9px 11px;
+}
+
+.permissionChecklist,
+.compactChecklist {
+  display: grid;
+  gap: 8px;
+}
+
+.permissionChecklist {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.permissionChecklist label,
+.compactChecklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17202a;
+  padding: 10px;
+}
+
+.permissionChecklist input,
+.compactChecklist input,
+.blockToggle input {
+  margin-top: 2px;
+}
+
+.permissionChecklist span {
+  display: grid;
+  gap: 2px;
+}
+
+.permissionChecklist small {
+  color: #5f6b7a;
+  font-size: 11px;
+}
+
+.compactChecklist {
+  max-height: 320px;
+  overflow: auto;
+  margin-bottom: 12px;
+}
+
+.compactChecklist label {
+  font-size: 13px;
+}
+
+.historyList {
+  display: grid;
+  gap: 8px;
+}
+
+.historyList article {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.historyList span {
+  color: #5f6b7a;
+  font-size: 12px;
+}
+
+:global([data-theme='escuro']) .successBox,
+:global(body[data-theme='escuro']) .successBox {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(20, 83, 45, 0.22);
+  color: #bbf7d0;
+}
+
+:global([data-theme='escuro']) .subjectTabs button,
+:global(body[data-theme='escuro']) .subjectTabs button,
+:global([data-theme='escuro']) .searchBox,
+:global(body[data-theme='escuro']) .searchBox,
+:global([data-theme='escuro']) .subjectList button,
+:global(body[data-theme='escuro']) .subjectList button,
+:global([data-theme='escuro']) .selectedHeader,
+:global(body[data-theme='escuro']) .selectedHeader,
+:global([data-theme='escuro']) .profileSelect select,
+:global(body[data-theme='escuro']) .profileSelect select,
+:global([data-theme='escuro']) .profileSelect input,
+:global(body[data-theme='escuro']) .profileSelect input,
+:global([data-theme='escuro']) .profileSelect textarea,
+:global(body[data-theme='escuro']) .profileSelect textarea,
+:global([data-theme='escuro']) .permissionChecklist label,
+:global(body[data-theme='escuro']) .permissionChecklist label,
+:global([data-theme='escuro']) .compactChecklist label,
+:global(body[data-theme='escuro']) .compactChecklist label,
+:global([data-theme='escuro']) .historyList article,
+:global(body[data-theme='escuro']) .historyList article {
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.86);
+  color: #f8fafc;
+}
+
+:global([data-theme='escuro']) .searchBox input,
+:global(body[data-theme='escuro']) .searchBox input {
+  color: #f8fafc;
+}
+
+@media (max-width: 1180px) {
+  .layout,
+  .permissionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .subjectList {
+    max-height: 360px;
+  }
+}
+
+@media (max-width: 720px) {
+  .permissionChecklist {
+    grid-template-columns: 1fr;
+  }
+
+  .selectedHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
