@@ -44,6 +44,8 @@ export const applyThemeToDocument = (theme) => {
   const nextTheme = normalizeTheme(theme);
 
   document.documentElement.setAttribute('data-theme', nextTheme);
+  // Tokens do AcessaNet Design System (public/design-system/acessanet-ds.css).
+  document.documentElement.setAttribute('data-an-theme', nextTheme === THEME_LIGHT ? 'light' : 'dark');
   document.documentElement.style.colorScheme = nextTheme === THEME_LIGHT ? 'light' : 'dark';
   document.body?.setAttribute('data-theme', nextTheme);
 };

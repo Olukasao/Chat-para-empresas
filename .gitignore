@@ -48,3 +48,6 @@ backend/.git/
 !.vscode/extensions.json
 *.local
 *.sw?
+
+# Originais dos motions (pesados, um passa de 100 MB): o app usa só as versões de src/motions/web
+frontend/src/motions/*.mp4

@@ -1,0 +1,264 @@
+/* Card da Competição CCNA v7 (home). Superfície escura da marca nos dois
+   temas, como o banner principal. Tokens: public/design-system/acessanet-ds.css */
+
+.anCcnaCard,
+.anCcnaCard * {
+  box-sizing: border-box;
+}
+
+.anCcnaCard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+  min-height: 196px;
+  padding: 24px 26px;
+  border: 1px solid rgba(var(--an-blue-300-rgb), 0.18);
+  border-radius: var(--an-radius-lg);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(var(--an-blue-500-rgb), 0.22), transparent 55%),
+    linear-gradient(160deg, var(--an-navy-800) 0%, var(--an-navy-900) 70%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 48px -28px rgba(3, 7, 22, 0.9);
+  color: var(--an-on-dark);
+  font-family: var(--an-font-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--an-dur-med) var(--an-ease-out),
+    box-shadow var(--an-dur-med) var(--an-ease-out),
+    transform var(--an-dur-fast) var(--an-ease-out);
+}
+
+/* fio de luz no topo: azul elétrico para ciano */
+.anCcnaCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 4%, var(--an-blue-400) 40%, var(--an-cyan-400) 70%, transparent 96%);
+  opacity: 0.7;
+}
+
+.anCcnaCard:hover {
+  border-color: rgba(var(--an-blue-300-rgb), 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 28px 56px -26px rgba(var(--an-blue-500-rgb), 0.55);
+}
+
+.anCcnaCard:active {
+  transform: scale(var(--an-state-pressed-scale, 0.99));
+}
+
+.anCcnaCard:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--an-cyan-400-rgb), 0.55);
+}
+
+/* topologia de rede ao fundo */
+.anCcnaTopology {
+  position: absolute;
+  right: 150px;
+  bottom: -18px;
+  z-index: -1;
+  width: 300px;
+  height: 170px;
+  pointer-events: none;
+  opacity: 0.5;
+  mask-image: radial-gradient(closest-side, #000 55%, transparent);
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent);
+}
+
+.anCcnaTopology line {
+  stroke: rgba(var(--an-blue-300-rgb), 0.28);
+  stroke-width: 1;
+}
+
+.anCcnaTopology circle {
+  fill: var(--an-navy-800);
+  stroke: rgba(var(--an-blue-300-rgb), 0.55);
+  stroke-width: 1.2;
+}
+
+.anCcnaTopology circle.is-core {
+  fill: var(--an-cyan-400);
+  stroke: none;
+  filter: drop-shadow(0 0 6px rgba(var(--an-cyan-400-rgb), 0.9));
+}
+
+/* conteúdo */
+.anCcnaBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.anCcnaTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid rgba(var(--an-blue-300-rgb), 0.22);
+  border-radius: var(--an-radius-pill);
+  background: rgba(var(--an-blue-500-rgb), 0.12);
+  color: var(--an-blue-300);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.anCcnaTitle {
+  margin-top: 4px;
+  font: 800 30px/1 var(--an-font-display);
+  letter-spacing: -0.035em;
+  color: var(--an-white, #fff);
+}
+
+.anCcnaText {
+  max-width: 44ch;
+  color: var(--an-on-dark-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.anCcnaMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: auto;
+  padding-top: 6px;
+  color: var(--an-on-dark-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.anCcnaMeta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.anCcnaMeta svg {
+  color: var(--an-cyan-400);
+}
+
+/* prêmio */
+.anCcnaPrize {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 168px;
+  text-align: right;
+}
+
+.anCcnaPrize small {
+  color: var(--an-on-dark-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.anCcnaPrize b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: -4px;
+  font: 800 46px/1 var(--an-font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+  color: var(--an-white, #fff);
+  text-shadow: 0 0 32px rgba(var(--an-cyan-400-rgb), 0.35);
+}
+
+.anCcnaCurrency {
+  color: var(--an-cyan-400);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+.anCcnaCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin-top: auto;
+  padding: 0 18px;
+  border-radius: var(--an-radius-pill);
+  background: var(--an-blue-500);
+  box-shadow: 0 10px 26px -10px rgba(var(--an-blue-500-rgb), 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color var(--an-dur-fast) var(--an-ease-out);
+}
+
+.anCcnaCta svg {
+  transition: transform var(--an-dur-fast) var(--an-ease-out);
+}
+
+.anCcnaCard:hover .anCcnaCta {
+  background: var(--an-blue-400);
+}
+
+.anCcnaCard:hover .anCcnaCta svg {
+  transform: translateX(3px);
+}
+
+@media (max-width: 620px) {
+  .anCcnaCard {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .anCcnaTopology {
+    top: 0;
+    right: -60px;
+    bottom: auto;
+  }
+
+  .anCcnaPrize {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+    padding-top: 16px;
+    border-top: 1px solid rgba(var(--an-blue-300-rgb), 0.14);
+    text-align: left;
+  }
+
+  .anCcnaPrize small {
+    flex-basis: 100%;
+  }
+
+  .anCcnaPrize b {
+    margin: 0;
+    font-size: 36px;
+  }
+
+  .anCcnaCta {
+    margin: 0 0 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anCcnaCard,
+  .anCcnaCta svg {
+    transition: none;
+  }
+
+  .anCcnaCard:hover .anCcnaCta svg,
+  .anCcnaCard:active {
+    transform: none;
+  }
+}

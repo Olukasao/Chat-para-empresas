@@ -2,16 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Paleta legada da intranet, agora derivada do AcessaNet Design System. */
 :root {
   color-scheme: dark;
-  --bg-main: #06152b;
-  --bg-panel: #071b38;
+  --bg-main: var(--an-navy-900);
+  --bg-panel: var(--an-navy-800);
   --bg-card: rgba(255, 255, 255, 0.06);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.72);
-  --border-soft: rgba(255, 255, 255, 0.10);
-  --accent: #00d4ff;
-  --accent-strong: #0077ff;
+  --text-primary: var(--an-on-dark);
+  --text-secondary: var(--an-on-dark-2);
+  --border-soft: var(--an-line-dark);
+  --accent: var(--an-cyan-400);
+  --accent-strong: var(--an-blue-500);
   --danger: #ff4d4d;
   --success: #22c55e;
 }
@@ -21,14 +22,14 @@ body[data-theme='escuro'],
 :root[data-theme='dark'],
 body[data-theme='dark'] {
   color-scheme: dark;
-  --bg-main: #06152b;
-  --bg-panel: #071b38;
+  --bg-main: var(--an-navy-900);
+  --bg-panel: var(--an-navy-800);
   --bg-card: rgba(255, 255, 255, 0.06);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.72);
-  --border-soft: rgba(255, 255, 255, 0.10);
-  --accent: #00d4ff;
-  --accent-strong: #0077ff;
+  --text-primary: var(--an-on-dark);
+  --text-secondary: var(--an-on-dark-2);
+  --border-soft: var(--an-line-dark);
+  --accent: var(--an-cyan-400);
+  --accent-strong: var(--an-blue-500);
   --danger: #ff4d4d;
   --success: #22c55e;
 }
@@ -38,14 +39,14 @@ body[data-theme='claro'],
 :root[data-theme='light'],
 body[data-theme='light'] {
   color-scheme: light;
-  --bg-main: #f3f7fb;
-  --bg-panel: #ffffff;
-  --bg-card: #ffffff;
-  --text-primary: #102033;
-  --text-secondary: #5d6b7a;
-  --border-soft: rgba(16, 32, 51, 0.12);
-  --accent: #0077ff;
-  --accent-strong: #0057cc;
+  --bg-main: var(--an-surface-1);
+  --bg-panel: var(--an-surface-0);
+  --bg-card: var(--an-surface-0);
+  --text-primary: var(--an-ink);
+  --text-secondary: var(--an-ink-3);
+  --border-soft: var(--an-line);
+  --accent: var(--an-blue-500);
+  --accent-strong: var(--an-accent-hover);
   --danger: #dc2626;
   --success: #16a34a;
 }
@@ -56,10 +57,14 @@ body,
   min-height: 100%;
 }
 
+/* Tokens globais: public/design-system/acessanet-ds.css (AcessaNet Design System). */
 body {
   margin: 0;
   background: var(--bg-main);
   color: var(--text-primary);
+  font-family: var(--an-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body.copa-theme,

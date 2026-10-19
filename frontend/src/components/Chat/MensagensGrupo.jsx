@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect, useMemo, useRef } from 'react';
 import api from '../../services/api';
 import styles from '../../styles/Chat.module.css';
 import NocDashboardResumo from './NocDashboardResumo';
+import { ChevronDown, Palette, Info, Loader2, Music2, Paperclip, Pin, Search, SendHorizontal, Users, X } from 'lucide-react';
 import EmojiPickerButton from './EmojiPickerButton';
 import ImageSendPreviewModal from './ImageSendPreviewModal';
 import ImageViewerModal from './ImageViewerModal';
@@ -144,6 +145,9 @@ const isZipFileMessage = (msg = {}) => {
 const isPendingImageAttachment = (attachment = {}) => (
   attachment.kind === 'imagem' && Boolean(attachment.previewUrl)
 );
+
+// Buscas da conversa após reconectar: imediata e duas de confirmação.
+const RESSINCRONIZACAO_APOS_RECONECTAR_MS = [150, 4000, 12000];
 
 export default function MensagensGrupo({
   grupo_id,
@@ -429,6 +433,47 @@ export default function MensagensGrupo({
     // A conversa aberta deve buscar mensagens só quando o ID do grupo mudar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grupo_id]);
+
+  const carregarMensagensRef = useRef(null);
+
+  useEffect(() => {
+    carregarMensagensRef.current = carregarMensagens;
+  });
+
+  // RESSINCRONIZAÇÃO: quem estava fora da sala do socket (queda de rede, reinício do
+  // servidor, aba em segundo plano) não recebe as mensagens enviadas nesse intervalo.
+  // Ao reconectar, volta para a sala e busca de novo; repete depois de alguns segundos
+  // para pegar mensagens gravadas por remetentes que reconectaram depois deste cliente.
+  useEffect(() => {
+    if (!socket || !grupo_id) return undefined;
+
+    const agendadas = [];
+    const recarregar = () => carregarMensagensRef.current?.({ mostrarLoading: false });
+    const limparAgendadas = () => agendadas.splice(0).forEach((id) => window.clearTimeout(id));
+
+    const ressincronizarAoReconectar = () => {
+      socket.emit('join_group', { grupo_id });
+      limparAgendadas();
+      RESSINCRONIZACAO_APOS_RECONECTAR_MS.forEach((atraso) => {
+        agendadas.push(window.setTimeout(recarregar, atraso));
+      });
+    };
+
+    const ressincronizarAoVoltar = () => {
+      if (document.visibilityState === 'visible') recarregar();
+    };
+
+    socket.on('connect', ressincronizarAoReconectar);
+    socket.io.on('reconnect', ressincronizarAoReconectar);
+    document.addEventListener('visibilitychange', ressincronizarAoVoltar);
+
+    return () => {
+      socket.off('connect', ressincronizarAoReconectar);
+      socket.io.off('reconnect', ressincronizarAoReconectar);
+      document.removeEventListener('visibilitychange', ressincronizarAoVoltar);
+      limparAgendadas();
+    };
+  }, [socket, grupo_id]);
 
   useEffect(() => () => {
     window.clearTimeout(favoritoFeedbackTimeoutRef.current);
@@ -1623,7 +1668,7 @@ export default function MensagensGrupo({
           onClick={() => abrirMensagemCompartilhada(mensagemFixada.message_id)}
           title="Ir para a mensagem fixada"
         >
-          <span className={styles.pinnedGroupIcon}>📌</span>
+          <span className={styles.pinnedGroupIcon}><Pin size={15} strokeWidth={2} aria-hidden="true" /></span>
           <span>
             <strong>Mensagem fixada</strong>
             <small>
@@ -1977,7 +2022,7 @@ export default function MensagensGrupo({
             </button>
           )}
           <div className={`${styles.conversaAvatar} ${styles.grupo}`}>
-            👥
+            <Users size={20} strokeWidth={1.9} aria-hidden="true" />
           </div>
           <div className={styles.chatHeaderInfo}>
             <p className={styles.chatHeaderTitle}>{grupoInfo?.nome}</p>
@@ -1989,7 +2034,7 @@ export default function MensagensGrupo({
         <div className={styles.chatHeaderActions}>
           {buscaAtiva ? (
             <div className={styles.searchBox} style={{ width: '100%', maxWidth: '360px' }}>
-              <span>🔍</span>
+              <Search size={15} strokeWidth={2} className={styles.searchIcon} aria-hidden="true" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -2001,29 +2046,32 @@ export default function MensagensGrupo({
               <button
                 className={styles.iconButton}
                 title="Fechar busca"
+                aria-label="Fechar busca"
                 onClick={() => {
                   setBuscaAtiva(false);
                   setPesquisa('');
                 }}
               >
-                ✕
+                <X size={16} strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
           ) : (
             <button
               className={styles.iconButton}
               title="Pesquisar no grupo"
+              aria-label="Pesquisar no grupo"
               onClick={() => setBuscaAtiva(true)}
             >
-              🔍
+              <Search size={18} strokeWidth={1.9} aria-hidden="true" />
             </button>
           )}
           <button
             className={styles.iconButton}
             title="Informações do grupo"
+            aria-label="Informações do grupo"
             onClick={abrirMembrosGrupo}
           >
-            ⓘ
+            <Info size={18} strokeWidth={1.9} aria-hidden="true" />
           </button>
           <div className={styles.headerMenuWrapper}>
             <button
@@ -2031,9 +2079,10 @@ export default function MensagensGrupo({
               className={styles.headerMenuButton}
               title="Opções do grupo"
               aria-label="Opções do grupo"
+              aria-expanded={menuConversaAberto}
               onClick={() => setMenuConversaAberto((atual) => !atual)}
             >
-              ▾
+              <ChevronDown size={18} strokeWidth={2} aria-hidden="true" />
             </button>
             {menuConversaAberto && (
               <div className={styles.headerMoreMenu}>
@@ -2052,7 +2101,7 @@ export default function MensagensGrupo({
                     setApariciaAberta(true);
                   }}
                 >
-                  🎨 Personalizar esta conversa
+                  <Palette size={15} strokeWidth={1.9} aria-hidden="true" /> Personalizar esta conversa
                 </button>
                 <button
                   type="button"
@@ -2090,7 +2139,7 @@ export default function MensagensGrupo({
 
       {abaChatAtiva === 'mensagens' && temMensagemFixada && (
         <section className={styles.pinnedGroupMessage}>
-          <div className={styles.pinnedGroupIcon}>📌</div>
+          <div className={styles.pinnedGroupIcon}><Pin size={15} strokeWidth={2} aria-hidden="true" /></div>
           <div>
             <strong>{grupoInfo.mensagem_fixada_titulo || 'Mensagem fixada'}</strong>
             <p>{grupoInfo.mensagem_fixada_conteudo}</p>
@@ -2625,10 +2674,11 @@ export default function MensagensGrupo({
             <button
               className={styles.attachButton}
               title="Anexar arquivo"
+              aria-label="Anexar arquivo"
               onClick={abrirSeletorArquivo}
               disabled={Boolean(mensagemEditando) || enviandoMensagem}
             >
-              📎
+              <Paperclip size={18} strokeWidth={1.9} aria-hidden="true" />
             </button>
             <input
               ref={imageInputRef}
@@ -2642,10 +2692,11 @@ export default function MensagensGrupo({
             <button
               className={styles.attachButton}
               title="Anexar áudio"
+              aria-label="Anexar áudio"
               onClick={abrirSeletorAudio}
               disabled={Boolean(mensagemEditando) || enviandoMensagem}
             >
-              🎵
+              <Music2 size={18} strokeWidth={1.9} aria-hidden="true" />
             </button>
             <input
               ref={audioInputRef}
@@ -2714,8 +2765,13 @@ export default function MensagensGrupo({
           className={styles.sendButton}
           onClick={enviarMensagem}
           disabled={enviandoMensagem || (!novaMsg.trim() && pendingAttachments.length === 0)}
+          title="Enviar mensagem"
+          aria-label={enviandoMensagem ? 'Enviando mensagem' : 'Enviar mensagem'}
+          aria-busy={enviandoMensagem || undefined}
         >
-          {enviandoMensagem ? '...' : '➤'}
+          {enviandoMensagem
+            ? <Loader2 size={18} strokeWidth={2.2} className={styles.sendButtonSpinner} aria-hidden="true" />
+            : <SendHorizontal size={18} strokeWidth={2.1} aria-hidden="true" />}
         </button>
       </div>
         </>

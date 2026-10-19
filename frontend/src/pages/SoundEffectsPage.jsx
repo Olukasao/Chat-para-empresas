@@ -34,7 +34,7 @@ import api from "../services/api";
 import { connectSocket, syncSocketUser } from "../services/socket";
 import styles from "../styles/SoundEffectsPage.module.css";
 
-const SOUND_EFFECT_MAX_VOLUME = 0.56;
+const SOUND_EFFECT_MAX_VOLUME = 0.7;
 const SOUND_EFFECT_DEFAULT_VOLUME = 0.48;
 const SOUND_EFFECT_ACK_TIMEOUT_MS = 12000;
 const SOUND_UPLOAD_MAX_SIZE_BYTES = 8 * 1024 * 1024;

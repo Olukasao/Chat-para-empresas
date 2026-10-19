@@ -1,0 +1,496 @@
+/*!
+ * AcessaNet Design System — camada operacional (v1.0)
+ *
+ * Fonte da identidade: AcessaNetLab (~/acessanet-lab/src/styles/tokens.css),
+ * que é o build servido em https://acessanet.com.br/.
+ * Valores marcados como "oficial" são cópia literal desses tokens.
+ * Valores marcados como "derivado" são calculados a partir dos oficiais para
+ * uso em software operacional (ver design-system/DESIGN.md).
+ *
+ * Uso em qualquer sistema AcessaNet:
+ *   <link rel="stylesheet" href="/design-system/acessanet-ds.css">
+ *   <html data-an-theme="dark">   (ou "light"; sem atributo segue o sistema)
+ *
+ * Camadas:
+ *   1. Primitivas de marca ........ --an-navy-*, --an-blue-*, --an-cyan-* ...
+ *   2. Status operacional ......... --an-status-*  (NUNCA usar como cor de marca)
+ *   3. Tipografia, espaço, raio, sombra, movimento
+ *   4. Tokens semânticos por tema . --an-bg, --an-surface, --an-text, --an-accent ...
+ *   5. Componentes base ........... .an-btn, .an-input, .an-card, .an-tabs ...
+ */
+
+/* ---------------------------------------------------------------- Fontes */
+/* Mesmos arquivos do AcessaNetLab (@fontsource-variable), servidos localmente. */
+@font-face {
+    font-family: "Sora Variable";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 800;
+    src: url("./fonts/sora-latin-ext-wght-normal.woff2") format("woff2-variations");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: "Sora Variable";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 800;
+    src: url("./fonts/sora-latin-wght-normal.woff2") format("woff2-variations");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Manrope Variable";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url("./fonts/manrope-latin-ext-wght-normal.woff2") format("woff2-variations");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: "Manrope Variable";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url("./fonts/manrope-latin-wght-normal.woff2") format("woff2-variations");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+    /* ============================================ 1. PRIMITIVAS DE MARCA */
+    /* oficial — azul profundo, azul elétrico, ciano, branco e neutros frios */
+    --an-navy-950: #030716;
+    --an-navy-900: #050b1f;
+    --an-navy-800: #0a1633;
+    --an-navy-700: #10224a;
+    --an-navy-600: #1a3266;
+    --an-blue-500: #2f6bff;
+    --an-blue-400: #4f86ff;
+    --an-blue-300: #8fb2ff;
+    --an-cyan-400: #3ad6ff;
+    --an-cyan-300: #8ae8ff;
+    --an-white: #ffffff;
+    --an-ink: #0b1630;
+    --an-ink-2: #33415c;
+    --an-ink-3: #5d6b85;
+    --an-line: #e3e9f3;
+    --an-line-dark: rgba(143, 178, 255, 0.16);
+    --an-surface-0: #ffffff;
+    --an-surface-1: #f4f7fc;
+    --an-surface-2: #eaf0fa;
+    --an-on-dark: #eef3ff;
+    --an-on-dark-2: rgba(226, 235, 255, 0.72);
+    --an-on-dark-3: rgba(226, 235, 255, 0.5);
+
+    /* derivado — sólidos equivalentes para texto/borda sobre navy (sem alpha) */
+    --an-navy-850: #0d1a3a;      /* entre 800 e 700, superfície elevada escura */
+    --an-mist-200: #d5deec;      /* borda forte em tema claro */
+    --an-mist-300: #c8d2e6;      /* texto secundário sobre navy  (on-dark .85) */
+    --an-mist-400: #a5adc1;      /* texto terciário sobre navy   (on-dark-2 sobre navy-900) */
+    --an-mist-500: #7d88a3;      /* texto desabilitado / placeholder sobre navy */
+
+    /* canais RGB para rgba(var(--x), alpha) */
+    --an-blue-500-rgb: 47, 107, 255;
+    --an-blue-400-rgb: 79, 134, 255;
+    --an-blue-300-rgb: 143, 178, 255;
+    --an-cyan-400-rgb: 58, 214, 255;
+    --an-navy-950-rgb: 3, 7, 22;
+    --an-navy-900-rgb: 5, 11, 31;
+    --an-navy-800-rgb: 10, 22, 51;
+    --an-ink-rgb: 11, 22, 48;
+
+    /* oficial — gradientes de marca */
+    --an-grad-electric: linear-gradient(135deg, #2f6bff 0%, #3ad6ff 100%);
+    --an-grad-deep: radial-gradient(120% 120% at 50% 0%, #10224a 0%, #050b1f 55%, #030716 100%);
+
+    /* ======================================= 2. STATUS OPERACIONAL */
+    /* Independentes da marca: são o vocabulário que a operação já reconhece.
+       Não usar azul/ciano de marca para comunicar estado, nem estes para marca. */
+    --an-status-open: #2563eb;        /* OS aberta */
+    --an-status-done: #16a34a;        /* OS encerrada / finalizada */
+    --an-status-running: #facc15;     /* OS em execução */
+    --an-status-running-ink: #1a1400;
+    --an-status-scheduled: #9800f7;   /* agendada / compromisso */
+    --an-status-iracema: #3ad6de;     /* fila Iracema */
+    --an-status-lunch: #f59e0b;       /* almoço */
+    --an-status-other: #14b8a6;       /* bloqueio "outro" */
+
+    --an-alert-critical: #ef4444;
+    --an-alert-critical-strong: #dc2626;
+    --an-alert-warning: #f59e0b;
+    --an-alert-caution: #f97316;
+    --an-alert-success: #22c55e;
+    --an-alert-info: #38bdf8;
+
+    /* ============================================== 3. TIPOGRAFIA */
+    --an-font-display: "Sora Variable", "Sora", system-ui, sans-serif;     /* oficial */
+    --an-font-body: "Manrope Variable", "Manrope", system-ui, sans-serif;  /* oficial */
+    --an-font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+
+    /* escala de produto (densa, para telas operacionais) */
+    --an-text-2xs: 10px;
+    --an-text-xs: 11px;
+    --an-text-sm: 12px;
+    --an-text-base: 13px;
+    --an-text-md: 14px;
+    --an-text-lg: 16px;
+    --an-text-xl: 18px;
+    --an-text-2xl: 22px;
+    --an-text-3xl: 28px;
+    /* escala de marca (oficial, para login/telas de entrada) */
+    --an-fs-hero: clamp(2.6rem, 1.4rem + 5.2vw, 5.6rem);
+    --an-fs-h2: clamp(2rem, 1.4rem + 2.4vw, 3.4rem);
+    --an-fs-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+
+    --an-weight-regular: 500;
+    --an-weight-medium: 600;
+    --an-weight-bold: 700;
+    --an-weight-heavy: 800;
+    --an-tracking-display: -0.025em;  /* oficial (h1–h4) */
+    --an-tracking-eyebrow: 0.14em;    /* rótulos em caixa alta */
+    --an-leading-tight: 1.15;
+    --an-leading-body: 1.5;
+
+    /* ================================================== ESPAÇO (4px) */
+    --an-space-0: 0;
+    --an-space-1: 4px;
+    --an-space-2: 8px;
+    --an-space-3: 12px;
+    --an-space-4: 16px;
+    --an-space-5: 20px;
+    --an-space-6: 24px;
+    --an-space-8: 32px;
+    --an-space-10: 40px;
+    --an-space-12: 48px;
+    --an-gutter: clamp(16px, 4vw, 40px); /* oficial */
+
+    /* altura de controles */
+    --an-control-sm: 28px;
+    --an-control-md: 34px;
+    --an-control-lg: 40px;
+
+    /* ===================================================== RAIO */
+    --an-radius-xs: 6px;       /* derivado: badges densos, células */
+    --an-radius-sm: 10px;      /* oficial */
+    --an-radius-md: 14px;      /* oficial */
+    --an-radius-lg: 22px;      /* oficial */
+    --an-radius-xl: 32px;      /* oficial */
+    --an-radius-pill: 999px;   /* oficial */
+
+    /* ==================================================== MOVIMENTO */
+    --an-ease-out: cubic-bezier(0.16, 1, 0.3, 1);       /* oficial */
+    --an-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); /* oficial */
+    --an-dur-instant: 90ms;
+    --an-dur-fast: 180ms;                               /* oficial */
+    --an-dur-med: 420ms;                                /* oficial */
+    --an-dur-slow: 900ms;                               /* oficial */
+
+    /* ===================================================== CAMADAS */
+    --an-z-dropdown: 1000;
+    --an-z-sticky: 1100;
+    --an-z-overlay: 9000;
+    --an-z-modal: 9100;
+    --an-z-toast: 9500;
+
+    /* ================================================== ESTADOS */
+    --an-state-disabled-opacity: 0.45;
+    --an-state-pressed-scale: 0.97;
+}
+
+/* =========================================== 4. TEMAS — CLARO (padrão) */
+:root,
+:root[data-an-theme="light"] {
+    color-scheme: light;
+    --an-bg: var(--an-surface-1);
+    --an-bg-chrome: rgba(255, 255, 255, 0.82);   /* barras fixas com blur */
+    --an-surface: var(--an-surface-0);
+    --an-surface-raised: var(--an-surface-0);
+    --an-surface-sunken: var(--an-surface-1);
+    --an-surface-hover: var(--an-surface-2);
+    --an-border: var(--an-line);
+    --an-border-strong: var(--an-mist-200);
+    --an-text: var(--an-ink);
+    --an-text-2: var(--an-ink-2);
+    --an-text-3: var(--an-ink-3);
+    --an-text-disabled: #95a1b7;
+
+    --an-accent: var(--an-blue-500);
+    --an-accent-rgb: var(--an-blue-500-rgb);
+    --an-neutral-rgb: 148, 160, 186;           /* derivado: neutro frio p/ bordas/realces translúcidos no claro */
+    --an-accent-hover: #255ae0;
+    --an-accent-text: var(--an-blue-500);
+    --an-accent-soft: rgba(47, 107, 255, 0.08);
+    --an-accent-soft-strong: rgba(47, 107, 255, 0.14);
+    --an-accent-border: rgba(47, 107, 255, 0.4);
+    --an-on-accent: #ffffff;
+    --an-highlight: #0a8fc2;   /* ciano legível em fundo claro (derivado de cyan-400) */
+
+    --an-focus-ring: 0 0 0 3px rgba(47, 107, 255, 0.28);
+    --an-overlay: rgba(11, 22, 48, 0.42);
+
+    --an-shadow-xs: 0 1px 2px rgba(11, 22, 48, 0.06);
+    --an-shadow-1: 0 1px 2px rgba(11, 22, 48, 0.06), 0 4px 14px rgba(11, 22, 48, 0.05);   /* oficial */
+    --an-shadow-2: 0 2px 6px rgba(11, 22, 48, 0.06), 0 18px 48px -12px rgba(11, 22, 48, 0.18); /* oficial */
+    --an-shadow-popover: 0 10px 38px -10px rgba(11, 22, 48, 0.28), 0 0 0 1px rgba(11, 22, 48, 0.06);
+    --an-glow-accent: 0 10px 30px -12px rgba(47, 107, 255, 0.6);
+
+    --an-scrollbar: rgba(11, 22, 48, 0.18);
+    --an-scrollbar-hover: rgba(11, 22, 48, 0.32);
+}
+
+/* ============================================================ ESCURO */
+:root[data-an-theme="dark"] {
+    color-scheme: dark;
+    --an-bg: var(--an-navy-900);
+    --an-bg-chrome: rgba(5, 11, 31, 0.72);       /* oficial (header do site) */
+    --an-surface: var(--an-navy-800);
+    --an-surface-raised: var(--an-navy-850);
+    --an-surface-sunken: var(--an-navy-950);
+    --an-surface-hover: var(--an-navy-700);
+    --an-border: var(--an-line-dark);
+    --an-border-strong: rgba(143, 178, 255, 0.28);
+    --an-text: var(--an-on-dark);
+    --an-text-2: var(--an-mist-300);
+    --an-text-3: var(--an-mist-400);
+    --an-text-disabled: var(--an-mist-500);
+
+    --an-accent: var(--an-blue-500);
+    --an-accent-rgb: var(--an-blue-400-rgb);
+    --an-neutral-rgb: var(--an-blue-300-rgb);  /* line-dark: bordas neutras translúcidas */
+    --an-accent-hover: var(--an-blue-400);
+    --an-accent-text: var(--an-blue-300);
+    --an-accent-soft: rgba(79, 134, 255, 0.12);
+    --an-accent-soft-strong: rgba(79, 134, 255, 0.2);
+    --an-accent-border: rgba(79, 134, 255, 0.5);
+    --an-on-accent: #ffffff;
+    --an-highlight: var(--an-cyan-400);
+
+    --an-focus-ring: 0 0 0 3px rgba(58, 214, 255, 0.35);
+    --an-overlay: rgba(3, 7, 22, 0.72);
+
+    --an-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --an-shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 4px 14px rgba(0, 0, 0, 0.28);
+    --an-shadow-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 60px -18px rgba(0, 0, 0, 0.7);
+    --an-shadow-popover: 0 0 0 1px rgba(143, 178, 255, 0.16), 0 18px 48px -12px rgba(0, 0, 0, 0.75);
+    --an-glow-accent: 0 10px 30px -10px rgba(47, 107, 255, 0.8); /* oficial (CTA do site) */
+
+    --an-scrollbar: rgba(143, 178, 255, 0.18);
+    --an-scrollbar-hover: rgba(143, 178, 255, 0.34);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-an-theme]) {
+        color-scheme: dark;
+        --an-bg: var(--an-navy-900);
+        --an-bg-chrome: rgba(5, 11, 31, 0.72);
+        --an-surface: var(--an-navy-800);
+        --an-surface-raised: var(--an-navy-850);
+        --an-surface-sunken: var(--an-navy-950);
+        --an-surface-hover: var(--an-navy-700);
+        --an-border: var(--an-line-dark);
+        --an-border-strong: rgba(143, 178, 255, 0.28);
+        --an-text: var(--an-on-dark);
+        --an-text-2: var(--an-mist-300);
+        --an-text-3: var(--an-mist-400);
+        --an-text-disabled: var(--an-mist-500);
+        --an-accent: var(--an-blue-500);
+        --an-accent-rgb: var(--an-blue-400-rgb);
+        --an-neutral-rgb: var(--an-blue-300-rgb);
+        --an-accent-hover: var(--an-blue-400);
+        --an-accent-text: var(--an-blue-300);
+        --an-accent-soft: rgba(79, 134, 255, 0.12);
+        --an-accent-soft-strong: rgba(79, 134, 255, 0.2);
+        --an-accent-border: rgba(79, 134, 255, 0.5);
+        --an-highlight: var(--an-cyan-400);
+        --an-focus-ring: 0 0 0 3px rgba(58, 214, 255, 0.35);
+        --an-overlay: rgba(3, 7, 22, 0.72);
+        --an-shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 4px 14px rgba(0, 0, 0, 0.28);
+        --an-shadow-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 60px -18px rgba(0, 0, 0, 0.7);
+        --an-shadow-popover: 0 0 0 1px rgba(143, 178, 255, 0.16), 0 18px 48px -12px rgba(0, 0, 0, 0.75);
+        --an-glow-accent: 0 10px 30px -10px rgba(47, 107, 255, 0.8);
+        --an-scrollbar: rgba(143, 178, 255, 0.18);
+        --an-scrollbar-hover: rgba(143, 178, 255, 0.34);
+    }
+}
+
+/* ===================================================== 5. COMPONENTES */
+/* Classes opcionais para novos sistemas. Sistemas legados podem mapear seus
+   seletores para estes mesmos tokens (ver agenda-brand.css). */
+
+.an-btn {
+    --_bg: var(--an-surface);
+    --_fg: var(--an-text);
+    --_bd: var(--an-border-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--an-space-2);
+    min-height: var(--an-control-md);
+    padding: 0 var(--an-space-4);
+    border: 1px solid var(--_bd);
+    border-radius: var(--an-radius-pill);
+    background: var(--_bg);
+    color: var(--_fg);
+    font: var(--an-weight-bold) var(--an-text-base) / 1 var(--an-font-body);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--an-dur-fast) var(--an-ease-out),
+        border-color var(--an-dur-fast) var(--an-ease-out),
+        color var(--an-dur-fast) var(--an-ease-out),
+        box-shadow var(--an-dur-fast) var(--an-ease-out),
+        transform var(--an-dur-instant) var(--an-ease-out);
+}
+
+.an-btn:hover { --_bg: var(--an-surface-hover); }
+.an-btn:active { transform: scale(var(--an-state-pressed-scale)); }
+.an-btn:focus-visible { outline: none; box-shadow: var(--an-focus-ring); }
+.an-btn:disabled,
+.an-btn[aria-disabled="true"] { opacity: var(--an-state-disabled-opacity); pointer-events: none; }
+
+.an-btn--primary {
+    --_bg: var(--an-accent);
+    --_fg: var(--an-on-accent);
+    --_bd: transparent;
+    box-shadow: var(--an-glow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.an-btn--primary:hover { --_bg: var(--an-accent-hover); }
+
+.an-btn--ghost { --_bg: transparent; --_bd: transparent; --_fg: var(--an-text-2); }
+.an-btn--ghost:hover { --_bg: var(--an-surface-hover); --_fg: var(--an-text); }
+.an-btn--danger { --_bg: transparent; --_bd: rgba(239, 68, 68, 0.45); --_fg: var(--an-alert-critical); }
+.an-btn--sm { min-height: var(--an-control-sm); padding: 0 var(--an-space-3); font-size: var(--an-text-sm); }
+
+.an-input,
+.an-select {
+    min-height: var(--an-control-md);
+    padding: 0 var(--an-space-3);
+    border: 1px solid var(--an-border-strong);
+    border-radius: var(--an-radius-sm);
+    background: var(--an-surface-sunken);
+    color: var(--an-text);
+    font: var(--an-weight-medium) var(--an-text-base) var(--an-font-body);
+    transition: border-color var(--an-dur-fast) var(--an-ease-out), box-shadow var(--an-dur-fast) var(--an-ease-out);
+}
+.an-input:hover,
+.an-select:hover { border-color: var(--an-accent-border); }
+.an-input:focus,
+.an-select:focus { outline: none; border-color: var(--an-accent); box-shadow: var(--an-focus-ring); }
+
+.an-card {
+    border: 1px solid var(--an-border);
+    border-radius: var(--an-radius-md);
+    background: var(--an-surface);
+    box-shadow: var(--an-shadow-1);
+}
+
+.an-eyebrow {
+    color: var(--an-text-3);
+    font: var(--an-weight-heavy) var(--an-text-2xs) / 1.2 var(--an-font-body);
+    letter-spacing: var(--an-tracking-eyebrow);
+    text-transform: uppercase;
+}
+
+.an-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 22px;
+    padding: 0 var(--an-space-2);
+    border: 1px solid var(--an-border);
+    border-radius: var(--an-radius-pill);
+    background: var(--an-surface-sunken);
+    color: var(--an-text-2);
+    font: var(--an-weight-bold) var(--an-text-xs) / 1 var(--an-font-body);
+    font-variant-numeric: tabular-nums;
+}
+.an-badge__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+.an-tabs { display: flex; gap: var(--an-space-1); }
+.an-tab {
+    position: relative;
+    min-height: var(--an-control-md);
+    padding: 0 var(--an-space-3);
+    border: 0;
+    background: transparent;
+    color: var(--an-text-3);
+    font: var(--an-weight-bold) var(--an-text-base) var(--an-font-body);
+    cursor: pointer;
+}
+.an-tab[aria-selected="true"],
+.an-tab.is-active { color: var(--an-text); }
+.an-tab[aria-selected="true"]::after,
+.an-tab.is-active::after {
+    content: "";
+    position: absolute;
+    left: var(--an-space-3);
+    right: var(--an-space-3);
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--an-grad-electric);
+}
+
+.an-kbd {
+    display: inline-flex;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--an-border-strong);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    color: var(--an-text-3);
+    font: var(--an-weight-bold) var(--an-text-2xs) var(--an-font-mono);
+}
+
+.an-skeleton {
+    border-radius: var(--an-radius-xs);
+    background: linear-gradient(90deg, var(--an-surface-hover) 0%, var(--an-surface-raised) 50%, var(--an-surface-hover) 100%);
+    background-size: 200% 100%;
+    animation: an-shimmer 1.4s linear infinite;
+}
+
+.an-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(var(--an-accent-rgb), 0.25);
+    border-top-color: var(--an-accent);
+    border-radius: 50%;
+    animation: an-spin 0.7s linear infinite;
+}
+
+.an-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--an-space-3);
+    color: var(--an-text);
+    text-decoration: none;
+}
+.an-brand-mark img { display: block; height: 30px; width: auto; }
+.an-brand-mark__divider { width: 1px; height: 22px; background: var(--an-border-strong); }
+.an-brand-mark__product {
+    font: var(--an-weight-bold) var(--an-text-lg) / 1 var(--an-font-display);
+    letter-spacing: -0.02em;
+}
+
+@keyframes an-spin { to { transform: rotate(360deg); } }
+@keyframes an-shimmer { to { background-position: -200% 0; } }
+@keyframes an-fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes an-pop {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .an-btn,
+    .an-input,
+    .an-select { transition: none; }
+    .an-skeleton,
+    .an-spinner { animation-duration: 0s; }
+}

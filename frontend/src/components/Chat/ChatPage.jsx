@@ -14,7 +14,14 @@ import {
   Globe2,
   Home,
   Image as ImageIcon,
+  LogOut,
   Megaphone,
+  MessageSquarePlus,
+  Moon,
+  Search,
+  Sun,
+  UserRound,
+  X,
   Network,
   PackageSearch,
   Palette,
@@ -34,7 +41,8 @@ import {
 import { setActiveBrowserNotificationConversation } from '../../services/browserNotifications';
 import { useBrowserNotifications } from '../../contexts/browserNotificationContext';
 import styles from '../../styles/Chat.module.css';
-import logoAcessa from '../../assets/logo.png';
+// Logotipo oficial do AcessaNetLab (public/design-system/brand).
+const logoAcessa = '/design-system/brand/acessanet-logo.png';
 import useTheme from '../../utils/useTheme';
 import { createInternalNavigationState } from '../../utils/internalNavigation';
 import { hasAvisosInternosUpdate, markAvisosInternosAsSeen } from '../../utils/avisosInternos';
@@ -44,7 +52,7 @@ import {
   obterDataUltimaMensagemGrupo,
 } from '../../utils/chatDatas';
 import { removerFormatacaoMensagem } from '../../utils/formatacaoMensagem';
-import { obterIconeGrupo } from '../../utils/grupoIcones';
+import { renderIconeGrupo } from '../../utils/grupoIcones';
 import {
   extrairGruposChat,
   formatarBadgeNaoLidas,
@@ -65,6 +73,9 @@ import CornerSeal from './CornerSeal';
 import HomeBanner from '../HomeBanner';
 import MassivoAlertCard from '../MassivoAlertCard';
 import CcnaCompetitionHighlightCard from '../CcnaCompetitionHighlightCard';
+import HomeHighlightsCarousel from '../HomeHighlightsCarousel';
+import { NOVIDADES_MOTIONS } from '../../data/novidades';
+import AgendaTecnicosCard from '../AgendaTecnicosCard';
 import PricingCalculator from '../PricingCalculator';
 import SemiDedicadoCalculator from '../SemiDedicadoCalculator';
 import PlanChangeCalculator from '../PlanChangeCalculator';
@@ -135,9 +146,7 @@ const QUICK_ACCESS_SECTION_DEFINITIONS = [
     itemIds: [
       'sgp',
       'solicitacoes-internas',
-      'solicitacoes-compras',
       'agenda',
-      'roleta-premios',
       ...(CONTROLE_OPERACIONAL_ENABLED ? ['controle-operacional'] : []),
       'busca-global',
     ],
@@ -585,6 +594,7 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
   const [avisosAtualizadoEm, setAvisosAtualizadoEm] = useState(null);
   const [avisosInternosPendentes, setAvisosInternosPendentes] = useState(false);
   const [bannerHome, setBannerHome] = useState(() => normalizeHomeBannerContent());
+  const [agendaTecnicosResumo, setAgendaTecnicosResumo] = useState(null);
   const [dashboardAlertasConectado, setDashboardAlertasConectado] = useState(false);
   const [massivosDashboard, setMassivosDashboard] = useState([]);
   const [celebracaoVenda, setCelebracaoVenda] = useState(null);
@@ -1209,6 +1219,20 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
       }
 
       setErroDados('Não foi possível carregar o chat. Verifique sua conexão com o servidor 192.168.1.133:8600.');
+    }
+  }
+
+  async function carregarAgendaTecnicos(tokenLocal = token) {
+    if (!tokenLocal) return;
+
+    try {
+      const { data } = await api.get('/agenda-tecnicos/resumo', {
+        headers: { Authorization: `Bearer ${tokenLocal}` },
+      });
+
+      setAgendaTecnicosResumo(data);
+    } catch (err) {
+      console.error('Erro ao carregar agenda de técnicos:', err);
     }
   }
 
@@ -1853,6 +1877,7 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
 
         setUser(userData);
         carregarBannerHome(tokenLocal);
+        carregarAgendaTecnicos(tokenLocal);
 
         // Conectar ao Socket.IO compartilhado
         const socketInstance = connectSocket(tokenLocal);
@@ -2020,6 +2045,7 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
         socketInstance.on('avisos_internos_updated', handleAvisosInternosRefresh);
         socketInstance.on('chat:force-refresh', handleForceRefresh);
         socketInstance.on('system:force-refresh', handleForceRefresh);
+        socketInstance.on('agenda-tecnicos:resumo', setAgendaTecnicosResumo);
         socketInstance.on('play-prank-sound', handlePrankSound);
         socketInstance.on('purchase_notification', handlePurchaseNotification);
         socketInstance.on('receive_direct_message', handleDirectMessage);
@@ -2042,6 +2068,7 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
           socketInstance.off('avisos_internos_updated', handleAvisosInternosRefresh);
           socketInstance.off('chat:force-refresh', handleForceRefresh);
           socketInstance.off('system:force-refresh', handleForceRefresh);
+          socketInstance.off('agenda-tecnicos:resumo', setAgendaTecnicosResumo);
           socketInstance.off('play-prank-sound', handlePrankSound);
           socketInstance.off('purchase_notification', handlePurchaseNotification);
           socketInstance.off('receive_direct_message', handleDirectMessage);
@@ -3112,30 +3139,37 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
                 alt="Acessa Net"
                 className={styles.sidebarLogo}
               />
+              <span className={styles.sidebarBrandDivider} aria-hidden="true" />
+              <span className={styles.sidebarBrandName}>Chat Interno</span>
             </button>
             <div className={styles.sidebarActions}>
               <button
                 className={`${styles.iconButton} ${mostrarUsuarios ? styles.activeAction : ''}`}
                 title="Nova conversa"
+                aria-label="Nova conversa"
                 onClick={abrirNovaConversa}
               >
-                💬
+                <MessageSquarePlus size={18} strokeWidth={1.9} aria-hidden="true" />
               </button>
               <button
                 type="button"
                 className={styles.iconButton}
                 title={temaClaro ? 'Ativar modo escuro' : 'Ativar modo claro'}
+                aria-label={temaClaro ? 'Ativar modo escuro' : 'Ativar modo claro'}
                 onClick={alternarTema}
               >
-                {temaClaro ? '☾' : '☀'}
+                {temaClaro
+                  ? <Moon size={17} strokeWidth={1.9} aria-hidden="true" />
+                  : <Sun size={17} strokeWidth={1.9} aria-hidden="true" />}
               </button>
               {estaNaHomeChat && sidebarChatsVisivel && (
                 <button
                   className={styles.iconButton}
                   title="Fechar chats"
+                  aria-label="Fechar chats"
                   onClick={() => setChatsSidebarAberta(false)}
                 >
-                  ×
+                  <X size={18} strokeWidth={1.9} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -3168,9 +3202,10 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
           </div>
 
           <div className={styles.searchBox}>
-            <span>🔍</span>
+            <Search size={15} strokeWidth={2} className={styles.searchIcon} aria-hidden="true" />
             <input
               type="text"
+              aria-label="Pesquisar chats e grupos"
               placeholder="Pesquisar chats e grupos..."
               className={styles.searchInput}
               value={busca}
@@ -3282,7 +3317,7 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
                     title={grupo.tem_acesso === false ? 'Acesso restrito a usuários autorizados' : undefined}
                   >
                     <div className={`${styles.conversaAvatar} ${styles.grupo}`}>
-                      <span>{grupo.tem_acesso === false ? '🔒' : obterIconeGrupo(grupo)}</span>
+                      {renderIconeGrupo(grupo, { bloqueado: grupo.tem_acesso === false })}
                     </div>
                     <div className={styles.conversaInfo}>
                       <p className={styles.conversaNome}>
@@ -3373,32 +3408,36 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
             <button
               className={styles.iconButton}
               title="Meu perfil"
+              aria-label="Meu perfil"
               onClick={abrirPerfil}
             >
-              👤
+              <UserRound size={17} strokeWidth={1.9} aria-hidden="true" />
             </button>
             <button
               className={styles.iconButton}
               title="Personalizar chat"
+              aria-label="Personalizar chat"
               onClick={() => setChatAppearanceAberto(true)}
             >
-              <Palette size={18} />
+              <Palette size={17} strokeWidth={1.9} aria-hidden="true" />
             </button>
             {user.perfil === 'admin' && (
               <button
                 className={styles.iconButton}
                 title="Painel admin"
+                aria-label="Painel admin"
                 onClick={() => navigate('/admin')}
               >
-                ⚙
+                <Settings size={17} strokeWidth={1.9} aria-hidden="true" />
               </button>
             )}
             <button
-              className={styles.iconButton}
-              title="Logout"
+              className={`${styles.iconButton} ${styles.iconButtonDanger}`}
+              title="Sair"
+              aria-label="Sair"
               onClick={logout}
             >
-              🚪
+              <LogOut size={17} strokeWidth={1.9} aria-hidden="true" />
             </button>
           </div>
         )}
@@ -5526,6 +5565,55 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
                 }
 
               }
+
+              /* Tema claro (AcessaNet DS): textos e controles que ficam direto sobre o
+                 fundo da página. Os cartões da home seguem escuros, como no tema escuro. */
+              :root[data-an-theme='light'] .chat-home-brand-title {
+                color: var(--an-ink);
+                text-shadow: none;
+              }
+
+              :root[data-an-theme='light'] .chat-home-brand-title span {
+                color: var(--an-blue-500);
+              }
+
+              :root[data-an-theme='light'] .chat-home-shortcuts-header strong,
+              :root[data-an-theme='light'] .chat-home-shortcuts-category-header strong {
+                color: var(--an-ink);
+              }
+
+              :root[data-an-theme='light'] .chat-home-shortcuts-header span {
+                color: var(--an-ink-3);
+              }
+
+              :root[data-an-theme='light'] .chat-home-shortcuts-empty {
+                border-color: rgba(var(--an-blue-500-rgb), 0.28);
+                background: rgba(var(--an-blue-500-rgb), 0.05);
+                color: var(--an-ink-2);
+              }
+
+              :root[data-an-theme='light'] .chat-home-manage-shortcuts,
+              :root[data-an-theme='light'] .chat-home-chat-toggle {
+                border-color: rgba(var(--an-blue-500-rgb), 0.3);
+                background: var(--an-surface-0);
+                color: var(--an-blue-500);
+              }
+
+              :root[data-an-theme='light'] .chat-home-shortcuts-empty p,
+              :root[data-an-theme='light'] .chat-home-shortcuts-empty strong {
+                color: var(--an-ink-2);
+              }
+
+              :root[data-an-theme='light'] .chat-home-tip-link {
+                color: var(--an-blue-500);
+              }
+
+              :root[data-an-theme='light'] .chat-home-quick-access-search {
+                border-color: var(--an-line);
+                background: var(--an-surface-0);
+                color: var(--an-ink);
+                box-shadow: var(--an-shadow-xs);
+              }
             `}</style>
 
             <div className="chat-home-orbit one" />
@@ -5565,26 +5653,34 @@ export default function ChatPage({ internalPage = null, hideDashboardSidebar = f
                 </div>
               </div>
 
-              <HomeBanner
-                content={bannerHome}
-                className="slide-up-in"
-                style={{ '--enter-delay': '140ms', '--enter-duration': '660ms' }}
-              />
-
-              <div className="chat-home-secondary-grid">
-                <CcnaCompetitionHighlightCard
-                  className="stagger-item"
-                  onOpen={() => navigate('/competicao-ccna')}
+              <HomeHighlightsCarousel
+                motions={NOVIDADES_MOTIONS}
+                renderAgenda={(ativa) => (
+                  <AgendaTecnicosCard resumo={agendaTecnicosResumo} active={ativa} />
+                )}
+              >
+                <HomeBanner
+                  key="banner"
+                  content={bannerHome}
+                  className="slide-up-in"
+                  style={{ '--enter-delay': '140ms', '--enter-duration': '660ms' }}
                 />
 
-                <MassivoAlertCard
-                  className="stagger-item"
-                  conectado={dashboardAlertasConectado}
-                  massivos={massivosDashboard}
-                  massivosCount={totalMassivosDashboard}
-                  onOpen={() => window.open('http://192.168.1.133/', '_blank', 'noopener,noreferrer')}
-                />
-              </div>
+                <div key="destaques" className="chat-home-secondary-grid">
+                  <CcnaCompetitionHighlightCard
+                    className="stagger-item"
+                    onOpen={() => navigate('/competicao-ccna')}
+                  />
+
+                  <MassivoAlertCard
+                    className="stagger-item"
+                    conectado={dashboardAlertasConectado}
+                    massivos={massivosDashboard}
+                    massivosCount={totalMassivosDashboard}
+                    onOpen={() => window.open('http://192.168.1.133/', '_blank', 'noopener,noreferrer')}
+                  />
+                </div>
+              </HomeHighlightsCarousel>
 
               <section className="chat-home-shortcuts chat-home-my-shortcuts">
                 <div className="chat-home-shortcuts-header">

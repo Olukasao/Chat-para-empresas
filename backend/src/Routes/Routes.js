@@ -13,6 +13,8 @@ import multer from "multer";
 import sharp from "sharp";
 import db from "../db/db.js";
 import authMiddleware from "../middlewares/middleware.js";
+import { AGENDA_SESSION_COOKIE, definirSessaoAgenda, validarSessaoAgenda } from "../services/agendaSessionService.js";
+import { obterResumoAgendaTecnicos } from "../services/agendaTecnicosResumoService.js";
 import purchaseModuleRoutes, { userHasPurchasePermission } from "./purchaseModule.js";
 import networkDiagnosticsRoutes from "./networkDiagnosticsRoutes.js";
 import rouletteRoutes from "./rouletteRoutes.js";
@@ -48,6 +50,29 @@ import {
 } from "../services/soundEffectPermissionsService.js";
 
 const route = Router();
+
+route.post("/integrations/agenda/session", authMiddleware, (req, res) => {
+    const sessaoToken = definirSessaoAgenda(req, res);
+    res.set("Cache-Control", "no-store").json({ identificado: Boolean(sessaoToken), sessaoToken });
+});
+
+route.delete("/integrations/agenda/session", (_req, res) => {
+    res.clearCookie(AGENDA_SESSION_COOKIE, { httpOnly: true, sameSite: "lax", path: "/" });
+    res.set("Cache-Control", "no-store").json({ identificado: false });
+});
+
+route.post("/integrations/agenda/session/verify", async (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const sessao = validarSessaoAgenda(String(req.headers.authorization || "").replace(/^Bearer /, ""));
+    if (!sessao) return res.status(401).json({ erro: "Sessão do chat expirada ou inválida." });
+    try {
+        const [rows] = await db.query("SELECT id, nome FROM usuarios WHERE id = ? AND deletado_em IS NULL LIMIT 1", [sessao.id]);
+        if (!rows.length) return res.status(401).json({ erro: "Usuário do chat não encontrado." });
+        res.json({ usuario: rows[0], sessaoId: sessao.sid, exp: sessao.exp });
+    } catch {
+        res.status(503).json({ erro: "Não foi possível validar a sessão do chat." });
+    }
+});
 
 const getSecret = () => getJwtSecret();
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
@@ -1594,15 +1619,6 @@ const QUICK_ACCESS_ITEMS = [
         sort_order: 45,
     },
     {
-        id: "roleta-premios",
-        label: "Roleta de Prêmios",
-        subtitle: "Giros, prêmios e resgates da campanha ativa",
-        icon: "RP",
-        type: "internal",
-        target: "/roleta-premios",
-        sort_order: 46,
-    },
-    {
         id: "controle-operacional",
         label: "Controle Operacional",
         subtitle: "Auditoria, eventos críticos e histórico da operação",
@@ -1620,16 +1636,6 @@ const QUICK_ACCESS_ITEMS = [
         type: "internal",
         target: "/solicitacoes-internas",
         sort_order: 48,
-    },
-    {
-        id: "solicitacoes-compras",
-        label: "Solicitação de Materiais",
-        subtitle: "Crie solicitações de materiais e acompanhe seus pedidos",
-        icon: "CA",
-        type: "internal",
-        target: "/solicitacoes",
-        sort_order: 49,
-        requires_purchase_permission: "purchase_module.access",
     },
     {
         id: "vendas",
@@ -14065,6 +14071,10 @@ route.post(
         }
     }
 );
+
+route.get("/agenda-tecnicos/resumo", authMiddleware, (_req, res) => {
+    res.set("Cache-Control", "no-store").json(obterResumoAgendaTecnicos());
+});
 
 route.get("/banner-home", authMiddleware, async (req, res) => {
     try {

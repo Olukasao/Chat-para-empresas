@@ -1,0 +1,422 @@
+/* Card "Agenda técnicos" da home: situação do dia vinda da agenda (porta 8500).
+   Mesma superfície escura da marca dos cards Novidades e CCNA, nos dois temas.
+   Tokens: public/design-system/acessanet-ds.css */
+
+.anAgenda,
+.anAgenda * {
+  box-sizing: border-box;
+}
+
+.anAgenda {
+  --anAg-encerrada: var(--an-alert-success);
+  --anAg-execucao: var(--an-cyan-400);
+  --anAg-aberta: rgba(var(--an-blue-300-rgb), 0.38);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 26px;
+  border: 1px solid rgba(var(--an-blue-300-rgb), 0.2);
+  border-radius: 24px;
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgba(var(--an-blue-500-rgb), 0.18), transparent 55%),
+    linear-gradient(160deg, var(--an-navy-800) 0%, var(--an-navy-900) 72%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 26px 64px -30px rgba(3, 7, 22, 0.95);
+  color: var(--an-on-dark);
+  font-family: var(--an-font-body);
+}
+
+.anAgenda::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 4%, var(--an-blue-400) 36%, var(--an-cyan-400) 68%, transparent 96%);
+  opacity: 0.7;
+}
+
+/* ---------- cabeçalho ---------- */
+
+.anAgendaHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.anAgendaTitle {
+  margin: 0;
+  font-family: var(--an-font-display);
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.anAgendaDia {
+  margin: 4px 0 0;
+  color: var(--an-on-dark-2);
+  font-size: 14px;
+}
+
+.anAgendaMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.anAgendaLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--an-on-dark-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.anAgendaLiveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--an-alert-success);
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  animation: anAgPulse 2.4s var(--an-ease-out) infinite;
+}
+
+.anAgendaLive.is-off .anAgendaLiveDot {
+  background: var(--an-alert-warning);
+  animation: none;
+}
+
+@keyframes anAgPulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  70%, 100% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+}
+
+.anAgendaAbrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(var(--an-blue-300-rgb), 0.28);
+  border-radius: var(--an-radius-pill);
+  color: var(--an-on-dark);
+  font-size: 13.5px;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background var(--an-dur-fast) var(--an-ease-out),
+    border-color var(--an-dur-fast) var(--an-ease-out);
+}
+
+.anAgendaAbrir:hover {
+  background: rgba(var(--an-blue-300-rgb), 0.1);
+  border-color: rgba(var(--an-blue-300-rgb), 0.5);
+}
+
+.anAgendaAbrir:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--an-cyan-400-rgb), 0.55);
+}
+
+.anAgendaEstado {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  margin: 0;
+  color: var(--an-on-dark-2);
+  font-size: 15px;
+}
+
+/* ---------- barra do dia ---------- */
+
+.anAgDia {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "total bar"
+    "total legenda";
+  align-items: center;
+  gap: 8px 20px;
+}
+
+.anAgDiaTotal {
+  grid-area: total;
+  margin: 0;
+  color: var(--an-on-dark-2);
+  font-size: 14px;
+}
+
+.anAgDiaTotal strong {
+  display: block;
+  color: var(--an-on-dark);
+  font-family: var(--an-font-display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.anAgDiaBar {
+  grid-area: bar;
+  display: flex;
+  gap: 3px;
+  height: 10px;
+  overflow: hidden;
+  border-radius: var(--an-radius-pill);
+  background: rgba(var(--an-blue-300-rgb), 0.08);
+}
+
+.anAgDiaSeg {
+  flex-basis: 0;
+  min-width: 6px;
+  transition: flex-grow var(--an-dur-slow) var(--an-ease-out);
+}
+
+.anAgDiaSeg.is-encerradas { background: var(--anAg-encerrada); }
+.anAgDiaSeg.is-execucao { background: var(--anAg-execucao); }
+.anAgDiaSeg.is-abertas { background: var(--anAg-aberta); }
+
+.anAgDiaLegenda {
+  grid-area: legenda;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--an-on-dark-2);
+  font-size: 13px;
+}
+
+.anAgDiaLegenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.anAgDiaLegenda strong {
+  color: var(--an-on-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.anAgDiaSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.is-encerradas > .anAgDiaSwatch { background: var(--anAg-encerrada); }
+.is-execucao > .anAgDiaSwatch { background: var(--anAg-execucao); }
+.is-abertas > .anAgDiaSwatch { background: var(--anAg-aberta); }
+
+/* ---------- técnicos ---------- */
+
+.anAgendaGrid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  /* as linhas esticam para ocupar a altura do palco; com muitos técnicos, rola */
+  grid-auto-rows: minmax(min-content, 1fr);
+  gap: 10px;
+  margin: 0;
+  padding: 0 2px 2px 0;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--an-blue-300-rgb), 0.2) transparent;
+}
+
+.anAgTec {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(var(--an-blue-300-rgb), 0.12);
+  border-radius: var(--an-radius-md);
+  background: rgba(var(--an-blue-300-rgb), 0.04);
+}
+
+.anAgTec.is-atendimento {
+  border-color: rgba(var(--an-cyan-400-rgb), 0.3);
+  background: linear-gradient(160deg, rgba(var(--an-cyan-400-rgb), 0.08), rgba(var(--an-blue-300-rgb), 0.03) 60%);
+}
+
+.anAgTecHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.anAgTecNome {
+  overflow: hidden;
+  font-family: var(--an-font-display);
+  font-size: 15px;
+  font-weight: 650;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.anAgTecSituacao {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--an-on-dark-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.anAgTecLed {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--anAg-aberta);
+}
+
+.is-atendimento .anAgTecSituacao { color: var(--an-cyan-400); }
+.is-atendimento .anAgTecLed { background: var(--anAg-execucao); }
+.is-concluido .anAgTecSituacao { color: var(--an-alert-success); }
+.is-concluido .anAgTecLed { background: var(--anAg-encerrada); }
+
+.anAgTecDia {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anAgOs {
+  display: grid;
+  grid-template-columns: 40px 9px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  margin-inline: -6px;
+  border-radius: 8px;
+  color: var(--an-on-dark-2);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.anAgOsHora {
+  color: var(--an-on-dark-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.anAgOsTexto {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.anAgOsBairro {
+  color: var(--an-on-dark-3);
+}
+
+/* OS já encerradas ficam em segundo plano; a em execução se destaca */
+.anAgOs.is-encerrada {
+  opacity: 0.6;
+}
+
+.anAgOs.is-execucao {
+  background: rgba(var(--an-cyan-400-rgb), 0.1);
+  color: var(--an-on-dark);
+  font-weight: 600;
+}
+
+.anAgOs.is-execucao .anAgOsHora {
+  color: var(--an-cyan-400);
+}
+
+.anAgOs.is-execucao .anAgOsBairro {
+  color: var(--an-on-dark-2);
+  font-weight: 500;
+}
+
+.anAgTecFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(var(--an-blue-300-rgb), 0.1);
+  color: var(--an-on-dark-3);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.anAgPip {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--anAg-aberta);
+}
+
+.anAgOs.is-encerrada .anAgPip {
+  border-color: var(--anAg-encerrada);
+  background: var(--anAg-encerrada);
+}
+
+.anAgOs.is-execucao .anAgPip {
+  border-color: var(--anAg-execucao);
+  background: var(--anAg-execucao);
+  box-shadow: 0 0 0 3px rgba(var(--an-cyan-400-rgb), 0.2);
+}
+
+.anAgTecConta {
+  flex: none;
+}
+
+.anAgSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .anAgenda {
+    padding: 20px;
+  }
+
+  .anAgDia {
+    grid-template-columns: 1fr;
+    grid-template-areas: "total" "bar" "legenda";
+  }
+
+  .anAgDiaTotal strong {
+    display: inline;
+    font-size: 26px;
+    margin-right: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anAgendaLiveDot {
+    animation: none;
+  }
+}

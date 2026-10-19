@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
+import { Smile } from 'lucide-react';
 import styles from '../../styles/Chat.module.css';
 
 export default function EmojiPickerButton({
@@ -38,16 +39,18 @@ export default function EmojiPickerButton({
         type="button"
         className={styles.attachButton}
         title="Adicionar emoji"
+        aria-label="Adicionar emoji"
+        aria-expanded={aberto}
         onClick={() => setAberto((atual) => !atual)}
         disabled={disabled}
       >
-        ☺
+        <Smile size={18} strokeWidth={1.9} aria-hidden="true" />
       </button>
 
       {aberto && (
         <div className={styles.emojiPickerPopover}>
           <EmojiPicker
-            theme={Theme.DARK}
+            theme={document.documentElement.getAttribute('data-an-theme') === 'light' ? Theme.LIGHT : Theme.DARK}
             lazyLoadEmojis
             searchPlaceHolder="Buscar emoji"
             previewConfig={{ showPreview: false }}

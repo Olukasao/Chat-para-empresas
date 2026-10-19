@@ -1,6 +1,7 @@
 import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import api from '../../services/api';
 import styles from '../../styles/Chat.module.css';
+import { ChevronDown, Palette, Info, Loader2, Music2, Paperclip, Pin, Search, SendHorizontal, Users, X } from 'lucide-react';
 import EmojiPickerButton from './EmojiPickerButton';
 import ImageSendPreviewModal from './ImageSendPreviewModal';
 import ImageViewerModal from './ImageViewerModal';
@@ -57,6 +58,8 @@ const SEARCH_FILE_TERMS = 'arquivo documento pdf word psd photoshop excel planil
 const ATTACHMENT_ACCEPT = undefined;
 const SYNC_CONVERSA_ATIVA_DEBOUNCE_MS = 180;
 const SYNC_CONVERSA_ATIVA_MIN_INTERVAL_MS = 1200;
+// Após reconectar, além da busca imediata, confirma de novo nesses intervalos.
+const RESSINCRONIZACAO_CONFIRMACAO_MS = [4000, 12000];
 const AUDIO_ACCEPT = [
   'audio/*',
   'audio/aac',
@@ -200,6 +203,7 @@ export default function MensagensDiretas({
   const carregarMensagensRef = useRef(null);
   const syncConversationTimeoutRef = useRef(null);
   const syncConversationInFlightRef = useRef(false);
+  const syncConversationPendingForceRef = useRef(false);
   const lastSyncConversationAtRef = useRef(0);
   const typingTimeoutRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -476,7 +480,11 @@ export default function MensagensDiretas({
 
   const sincronizarConversaAtual = useCallback(({ force = false } = {}) => {
     if (!usuario_id || !token) return;
-    if (syncConversationInFlightRef.current) return;
+    if (syncConversationInFlightRef.current) {
+      // Uma sincronização forçada (reconexão) não pode se perder: roda quando a atual terminar.
+      if (force) syncConversationPendingForceRef.current = true;
+      return;
+    }
 
     const agora = Date.now();
     if (!force && agora - lastSyncConversationAtRef.current < SYNC_CONVERSA_ATIVA_MIN_INTERVAL_MS) {
@@ -489,6 +497,11 @@ export default function MensagensDiretas({
     Promise.resolve(carregarMensagensRef.current?.({ mostrarLoading: false }))
       .finally(() => {
         syncConversationInFlightRef.current = false;
+
+        if (syncConversationPendingForceRef.current) {
+          syncConversationPendingForceRef.current = false;
+          sincronizarConversaAtual({ force: true });
+        }
       });
   }, [token, usuario_id]);
 
@@ -724,11 +737,21 @@ export default function MensagensDiretas({
       setMensagemFixada(data.pinned_message || null);
     };
 
+    // Buscas de confirmação: pegam mensagens gravadas por remetentes que reconectaram depois.
+    const confirmacoesAgendadas = [];
+    const limparConfirmacoes = () => confirmacoesAgendadas.splice(0).forEach((id) => window.clearTimeout(id));
+
     const ressincronizarAoReconectar = () => {
       if (!conversa_id) return;
 
       socket.emit('join_direct_chat', { conversa_id });
       agendarSincronizacaoConversaAtual({ force: true });
+      limparConfirmacoes();
+      RESSINCRONIZACAO_CONFIRMACAO_MS.forEach((atraso) => {
+        confirmacoesAgendadas.push(window.setTimeout(() => {
+          agendarSincronizacaoConversaAtual({ force: true });
+        }, atraso));
+      });
     };
 
     socket.on('connect', ressincronizarAoReconectar);
@@ -745,6 +768,7 @@ export default function MensagensDiretas({
     socket.on('user_status_changed', handleStatusUsuario);
 
     return () => {
+      limparConfirmacoes();
       socket.off('connect', ressincronizarAoReconectar);
       socket.io.off('reconnect', ressincronizarAoReconectar);
       socket.off('receive_direct_message', handleNovaMsg);
@@ -1572,7 +1596,7 @@ export default function MensagensDiretas({
           onClick={() => abrirMensagemCompartilhada(mensagemFixada.message_id)}
           title="Ir para a mensagem fixada"
         >
-          <span className={styles.pinnedGroupIcon}>📌</span>
+          <span className={styles.pinnedGroupIcon}><Pin size={15} strokeWidth={2} aria-hidden="true" /></span>
           <span>
             <strong>Mensagem fixada</strong>
             <small>
@@ -1890,23 +1914,9 @@ export default function MensagensDiretas({
           </div>
         </div>
         <div className={styles.chatHeaderActions}>
-          <button
-            className={styles.iconButton}
-            title="Ligação"
-            onClick={() => alert('Ligação ainda não está disponível neste chat.')}
-          >
-            ☎️
-          </button>
-          <button
-            className={styles.iconButton}
-            title="Chamada de vídeo"
-            onClick={() => alert('Chamada de vídeo ainda não está disponível neste chat.')}
-          >
-            📹
-          </button>
           {buscaAtiva ? (
           <div className={styles.searchBox} style={{ width: '100%', maxWidth: '380px' }}>
-            <span>🔍</span>
+            <Search size={15} strokeWidth={2} className={styles.searchIcon} aria-hidden="true" />
             <input
               ref={searchInputRef}
               type="text"
@@ -1918,21 +1928,23 @@ export default function MensagensDiretas({
             <button
               className={styles.iconButton}
               title="Fechar busca"
+              aria-label="Fechar busca"
               onClick={() => {
                 setBuscaAtiva(false);
                 setPesquisa('');
               }}
             >
-              ✕
+              <X size={16} strokeWidth={2} aria-hidden="true" />
             </button>
           </div>
         ) : (
           <button
             className={styles.iconButton}
             title="Pesquisar na conversa"
+            aria-label="Pesquisar na conversa"
             onClick={() => setBuscaAtiva(true)}
           >
-            🔍
+            <Search size={18} strokeWidth={1.9} aria-hidden="true" />
           </button>
         )}
         <div className={styles.headerMenuWrapper}>
@@ -1941,9 +1953,10 @@ export default function MensagensDiretas({
             className={styles.headerMenuButton}
             title="Opções da conversa"
             aria-label="Opções da conversa"
+            aria-expanded={menuConversaAberto}
             onClick={() => setMenuConversaAberto((atual) => !atual)}
           >
-            ▾
+            <ChevronDown size={18} strokeWidth={2} aria-hidden="true" />
           </button>
           {menuConversaAberto && (
             <div className={styles.headerMoreMenu}>
@@ -1962,7 +1975,7 @@ export default function MensagensDiretas({
                   setApariciaAberta(true);
                 }}
               >
-                🎨 Personalizar esta conversa
+                <Palette size={15} strokeWidth={1.9} aria-hidden="true" /> Personalizar esta conversa
               </button>
               <button
                 type="button"
@@ -2328,10 +2341,11 @@ export default function MensagensDiretas({
             <button
               className={styles.attachButton}
               title="Anexar arquivo"
+              aria-label="Anexar arquivo"
               onClick={abrirSeletorArquivo}
               disabled={Boolean(mensagemEditando) || enviandoMensagem}
             >
-              📎
+              <Paperclip size={18} strokeWidth={1.9} aria-hidden="true" />
             </button>
             <input
               ref={imageInputRef}
@@ -2345,10 +2359,11 @@ export default function MensagensDiretas({
             <button
               className={styles.attachButton}
               title="Anexar áudio"
+              aria-label="Anexar áudio"
               onClick={abrirSeletorAudio}
               disabled={Boolean(mensagemEditando) || enviandoMensagem}
             >
-              🎵
+              <Music2 size={18} strokeWidth={1.9} aria-hidden="true" />
             </button>
             <input
               ref={audioInputRef}
@@ -2390,8 +2405,13 @@ export default function MensagensDiretas({
           className={styles.sendButton}
           onClick={enviarMensagem}
           disabled={enviandoMensagem || (!novaMsg.trim() && pendingAttachments.length === 0)}
+          title="Enviar mensagem"
+          aria-label={enviandoMensagem ? 'Enviando mensagem' : 'Enviar mensagem'}
+          aria-busy={enviandoMensagem || undefined}
         >
-          {enviandoMensagem ? '...' : '➤'}
+          {enviandoMensagem
+            ? <Loader2 size={18} strokeWidth={2.2} className={styles.sendButtonSpinner} aria-hidden="true" />
+            : <SendHorizontal size={18} strokeWidth={2.1} aria-hidden="true" />}
         </button>
       </div>
         </>

@@ -6,7 +6,7 @@ import {
   obterDataUltimaMensagemGrupo,
 } from '../../utils/chatDatas';
 import { formatarBadgeNaoLidas, normalizarTotalNaoLidas } from '../../utils/chatUnread';
-import { obterIconeGrupo } from '../../utils/grupoIcones';
+import { renderIconeGrupo } from '../../utils/grupoIcones';
 
 export default function Grupos({
   grupos,
@@ -83,7 +83,6 @@ export default function Grupos({
 
   const renderGrupo = (grupo) => {
     const bloqueado = !temAcessoGrupo(grupo);
-    const iconeGrupo = bloqueado ? '🔒' : obterIconeGrupo(grupo);
     const dataUltimaMensagem = obterDataUltimaMensagemGrupo(grupo);
     const naoLidas = normalizarTotalNaoLidas(grupo.unreadCount ?? grupo.nao_lidas);
 
@@ -101,7 +100,7 @@ export default function Grupos({
 	        title={bloqueado ? 'Acesso restrito a usuários autorizados' : undefined}
 	      >
 	        <div className={`${styles.conversaAvatar} ${styles.grupoAvatar}`}>
-	          <span style={{ fontSize: '20px' }}>{iconeGrupo}</span>
+	          {renderIconeGrupo(grupo, { bloqueado })}
 	        </div>
 
 	        <div className={styles.conversaInfo}>

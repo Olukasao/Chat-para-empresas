@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { BrowserNotificationProvider } from "../contexts/BrowserNotificationProvider";
+import ContratacoesPendentes from "../components/ContratacoesPendentes";
 import Login from "../pages/Login";
 import AtendimentoSso from "../pages/AtendimentoSso";
 import ChatPage from "../components/Chat/ChatPage";
@@ -53,6 +54,7 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <BrowserNotificationProvider>
+        <ContratacoesPendentes />
         <Routes>
           <Route path="/atendimento-sso" element={<AtendimentoSso />} />
           <Route path="/login" element={<Login />} />

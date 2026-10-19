@@ -6,6 +6,7 @@ let soundEffectPermissionsTabelaGarantidaPromise = null;
 const DEFAULT_OWNER_MATCH = "lucas";
 const DEFAULT_TARGET_GROUP_NAME = "NOC";
 const BLOCKED_TARGET_FIRST_NAMES = ["samuel", "diego", "carlos", "dalton"];
+const BLOCKED_TARGET_USER_IDS = new Set([31]); // Leonardo Silva
 
 const normalizarTexto = (valor = "") => (
     String(valor || "")
@@ -54,6 +55,7 @@ const usuarioCombinaComDonoPadrao = (usuario = {}) => {
 
 const usuarioBloqueadoParaReceberEfeitoSonoro = (usuario = {}) => {
     if (!usuario) return false;
+    if (BLOCKED_TARGET_USER_IDS.has(Number(usuario.id))) return true;
 
     const primeiroNome = normalizarTexto(usuario.nome).split(/\s+/)[0] || "";
     return BLOCKED_TARGET_FIRST_NAMES.includes(primeiroNome);

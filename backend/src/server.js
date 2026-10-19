@@ -16,6 +16,13 @@ import route from "./Routes/Routes.js";
 import { getDiagnosticRunByRunId } from './repositories/networkDiagnosticsRepository.js';
 import { userHasNetworkDiagnosticPermission } from './services/networkDiagnosticPermissionsService.js';
 import { getJwtSecret } from './config/authSecrets.js';
+import { lerCookieAgenda, validarSessaoAgenda } from './services/agendaSessionService.js';
+import { iniciarAgendaTecnicosResumo } from './services/agendaTecnicosResumoService.js';
+import {
+    iniciarContratacoesPendentes,
+    obterResumoContratacoes,
+    SALA_CONTRATACOES,
+} from './services/contratacoesPendentesService.js';
 import { AUDIT_LEVELS, AUDIT_TYPES, registrarAuditoria } from './services/auditService.js';
 import { getAllowedSoundEffect, PUBLIC_SOUNDS_ROOT } from './services/soundEffectsService.js';
 import {
@@ -273,6 +280,12 @@ const io = new Server(server, {
 });
 
 app.set('io', io);
+
+// Situação da agenda de técnicos para o card da home (evento agenda-tecnicos:resumo).
+iniciarAgendaTecnicosResumo(io);
+
+// Contratações pendentes do site (eventos contratacoes:resumo e contratacoes:novo).
+iniciarContratacoesPendentes(io);
 
 // Mapa de usuários conectados e suas abas/dispositivos ativos
 const usuariosConectados = new Map();
@@ -863,6 +876,8 @@ const entrarSalasDoUsuario = async (socket, { usuarioId, empresaId, motivo = 'sy
 
     socket.join(`user_${usuarioKey}`);
     socket.join(`empresa_${empresaKey}`);
+    socket.join(SALA_CONTRATACOES);
+    socket.emit('contratacoes:resumo', obterResumoContratacoes());
 
     const [conversas] = await db.query(
         'SELECT id FROM conversas_diretas WHERE usuario1_id = ? OR usuario2_id = ?',
@@ -950,6 +965,59 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error('Erro ao conectar usuário no socket:', err);
             socket.emit('socket_error', { error: 'Erro ao conectar ao chat' });
+        }
+    });
+
+    // Widget de chat da Agenda Técnicos: chega pelo túnel do servidor da agenda, com o cookie de
+    // sessão assinado por este chat. O usuário vem da sessão validada, nunca de dados do cliente.
+    socket.on('agenda_widget_connect', async () => {
+        try {
+            const sessao = validarSessaoAgenda(lerCookieAgenda(socket.handshake?.headers?.cookie));
+            if (!sessao) {
+                socket.emit('agenda_widget_error', { error: 'Sessão do chat expirada. Entre no Chat Interno novamente.' });
+                return;
+            }
+
+            const [rows] = await db.query(`
+                SELECT id, nome, avatar, empresa_id
+                FROM usuarios
+                WHERE id = ? AND deletado_em IS NULL
+                LIMIT 1
+            `, [sessao.id]);
+            if (!rows.length) {
+                socket.emit('agenda_widget_error', { error: 'Usuário do chat não encontrado.' });
+                return;
+            }
+
+            const usuario = rows[0];
+            const jaEstavaOnline = usuarioEstaConectado(usuario.id);
+            registrarUsuarioConectado(socket, usuario.id, usuario.empresa_id);
+            await entrarSalasDoUsuario(socket, {
+                usuarioId: usuario.id,
+                empresaId: usuario.empresa_id,
+                motivo: 'agenda-widget',
+            });
+            await marcarMensagensEntreguesDoUsuario(usuario.id);
+
+            await db.query(
+                'UPDATE usuarios SET status = ? WHERE id = ? AND deletado_em IS NULL',
+                ['online', usuario.id]
+            );
+            if (!jaEstavaOnline) {
+                io.to(`empresa_${usuario.empresa_id}`).emit('user_status_changed', {
+                    usuario_id: Number(usuario.id),
+                    status: 'online',
+                    ultimo_acesso: null,
+                });
+            }
+
+            socket.emit('agenda_widget_ready', {
+                usuario: { id: usuario.id, nome: usuario.nome, avatar: usuario.avatar, empresa_id: usuario.empresa_id },
+            });
+            console.log(`[SOCKET] Usuário ${usuario.id} conectado pelo widget da agenda`);
+        } catch (err) {
+            console.error('Erro ao conectar widget da agenda:', err);
+            socket.emit('agenda_widget_error', { error: 'Erro ao conectar ao chat' });
         }
     });
 

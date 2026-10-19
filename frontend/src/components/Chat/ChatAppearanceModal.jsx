@@ -567,10 +567,11 @@ export default function ChatAppearanceModal({ open, onClose, token, conversation
         )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 20px', borderTop: '1px solid var(--border-color, #0b2a44)' }}>
-          <button type="button" onClick={handleRestaurarPadrao} disabled={saving}>Restaurar padrão</button>
+          {/* Botões do AcessaNet Design System (public/design-system/acessanet-ds.css). */}
+          <button type="button" className="an-btn an-btn--ghost" onClick={handleRestaurarPadrao} disabled={saving}>Restaurar padrão</button>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="button" onClick={handleCancelar} disabled={saving}>Cancelar</button>
-            <button type="button" onClick={handleSalvar} disabled={saving || loading}>
+            <button type="button" className="an-btn" onClick={handleCancelar} disabled={saving}>Cancelar</button>
+            <button type="button" className="an-btn an-btn--primary" onClick={handleSalvar} disabled={saving || loading}>
               {saving ? 'Salvando...' : 'Salvar alterações'}
             </button>
           </div>

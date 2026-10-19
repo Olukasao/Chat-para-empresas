@@ -1,6 +1,32 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Eye, Image as ImageIcon, LayoutTemplate, MessageSquareReply, ShieldCheck, Trash2, Upload, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  BellRing,
+  CheckCircle2,
+  ChevronRight,
+  Eye,
+  Gift,
+  History,
+  Image as ImageIcon,
+  Images,
+  LayoutDashboard,
+  LayoutTemplate,
+  LogOut,
+  Megaphone,
+  MessageCircleQuestion,
+  MessageSquareReply,
+  MessageSquareWarning,
+  PartyPopper,
+  ShieldCheck,
+  ShoppingCart,
+  Trash2,
+  Upload,
+  Users,
+  UsersRound,
+  X,
+} from "lucide-react";
 import InternalNoticeModal from "../components/InternalNoticeModal";
 import api from "../services/api";
 import { disconnectSocket } from "../services/socket";
@@ -37,6 +63,26 @@ const feedbackFiltros = [
   { id: "resolvido", label: "Resolvidos" },
 ];
 const feedbackStatusOptions = ["aberto", "em_analise", "resolvido", "ignorado"];
+const ADMIN_SECOES = [
+  { id: "visao-geral", label: "Visão geral", Icone: LayoutDashboard },
+  { id: "usuarios", label: "Usuários", Icone: Users },
+  { id: "grupos", label: "Grupos", Icone: UsersRound },
+  { id: "aviso-interno", label: "Aviso interno", Icone: Megaphone },
+  { id: "duvidas", label: "Dúvidas", Icone: MessageCircleQuestion },
+  { id: "feedbacks", label: "Feedbacks", Icone: MessageSquareWarning },
+];
+const ADMIN_FERRAMENTAS = [
+  { id: "banner", label: "Banner da home", descricao: "Textos, indicadores e oferta do banner principal.", rota: "/admin/banner-home", Icone: LayoutTemplate },
+  { id: "avisos", label: "Avisos internos", descricao: "Comunicados da página de avisos internos.", rota: "/admin/avisos-internos", Icone: BellRing },
+  { id: "imagens", label: "Imagens", descricao: "Imagens usadas na intranet.", rota: "/imagens", Icone: Images },
+  { id: "historico", label: "Histórico de mensagens", descricao: "Mensagens trocadas no chat.", rota: "/admin/chat-historico", Icone: History },
+  { id: "compras", label: "Permissões de compras", descricao: "Acesso às solicitações de compra.", rota: "/admin/permissoes-compras", Icone: ShoppingCart },
+  { id: "roleta", label: "Roleta de prêmios", descricao: "Prêmios da roleta.", rota: "/admin/roleta-premios", Icone: Gift },
+];
+const lerSecaoAdmin = () => {
+  const secao = window.location.hash.replace("#", "");
+  return ADMIN_SECOES.some(({ id }) => id === secao) ? secao : "visao-geral";
+};
 const ehDuvidaBoasPraticas = (feedback) => (
   feedback?.tipo === "pergunta"
   && feedback?.pagina === BOAS_PRATICAS_DUVIDAS_PAGINA
@@ -258,6 +304,7 @@ export default function Admin() {
   const [setores, setSetores] = useState([]);
   const [grupos, setGrupos] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [secaoAdmin, setSecaoAdmin] = useState(lerSecaoAdmin);
   const [duvidasBoasPraticas, setDuvidasBoasPraticas] = useState([]);
   const [avisoGeral, setAvisoGeral] = useState(null);
   const [avisoGeralForm, setAvisoGeralForm] = useState(criarAvisoGeralFormPadrao);
@@ -316,6 +363,12 @@ export default function Admin() {
   const [fogosVendaTeste, setFogosVendaTeste] = useState([]);
   const [testandoEfeitoVenda, setTestandoEfeitoVenda] = useState(false);
   const audioContextRef = useRef(null);
+
+  useEffect(() => {
+    const sincronizarSecaoComHash = () => setSecaoAdmin(lerSecaoAdmin());
+    window.addEventListener("hashchange", sincronizarSecaoComHash);
+    return () => window.removeEventListener("hashchange", sincronizarSecaoComHash);
+  }, []);
   const celebracaoVendaTimeoutRef = useRef(null);
   const confetesVendaTimeoutRef = useRef(null);
   const fogosVendaTimeoutRef = useRef(null);
@@ -1331,6 +1384,9 @@ export default function Admin() {
   const duvidasPendentes = useMemo(() => (
     duvidasBoasPraticas.filter((duvida) => duvida.status !== 'resolvido')
   ), [duvidasBoasPraticas]);
+  const feedbacksAbertos = useMemo(() => (
+    feedbacksGerais.filter((feedback) => (feedback.status || "aberto") === "aberto").length
+  ), [feedbacksGerais]);
   const duvidasRespondidas = useMemo(() => (
     duvidasBoasPraticas.filter((duvida) => duvida.status === 'resolvido' && duvida.resposta)
   ), [duvidasBoasPraticas]);
@@ -1423,16 +1479,28 @@ export default function Admin() {
     return classes.join(' ');
   };
 
+  const abrirSecaoAdmin = (secao) => {
+    setSecaoAdmin(secao);
+    window.history.replaceState(window.history.state, "", `#${secao}`);
+    window.scrollTo({ top: 0 });
+  };
+  const contagensSecaoAdmin = {
+    usuarios: { valor: usuarios.length },
+    grupos: { valor: grupos.length },
+    duvidas: { valor: duvidasPendentes.length, alerta: true },
+    feedbacks: { valor: feedbacksAbertos, alerta: true },
+  };
+
   if (loading) {
     return (
-      <div className={styles.page}>
+      <div className={`${styles.page} ${styles.consolePage}`}>
         <div className={styles.loading}>Carregando painel administrativo...</div>
       </div>
     );
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${styles.consolePage}`}>
       {(confetesVendaTeste.length > 0 || fogosVendaTeste.length > 0 || celebracaoVendaTeste) && (
         <div className={styles.salesCelebrationLayer}>
           {fogosVendaTeste.map((fogo) => (
@@ -1503,43 +1571,27 @@ export default function Admin() {
         </div>
       )}
 
-      <header className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Painel administrativo</p>
-          <h1>Controle da empresa</h1>
-          <p className={styles.subtitle}>
-            {user.empresa_nome || "Empresa"} · {user.nome || "Administrador"}
-          </p>
+      <header className={styles.consoleTopbar}>
+        <div className={styles.consoleBrand}>
+          <span className={styles.consoleLogo}>
+            <img src="/design-system/brand/acessanet-logo.png" alt="AcessaNet" width="86" height="32" />
+          </span>
+          <span className={styles.consoleBrandDivider} aria-hidden="true" />
+          <div>
+            <h1>Controle da empresa</h1>
+            <p className={styles.subtitle}>
+              {user.empresa_nome || "Empresa"} · {user.nome || "Administrador"}
+            </p>
+          </div>
         </div>
 
-        <div className={styles.headerActions}>
-          <button
-            type="button"
-            className={styles.salesTestButton}
-            onClick={testarEfeitoVenda}
-            disabled={testandoEfeitoVenda}
-          >
-            {testandoEfeitoVenda ? "Disparando teste..." : "Testar efeito de venda"}
-          </button>
-          <button type="button" className={styles.secondaryButton} onClick={() => navigate("/admin/avisos-internos")}>
-            Editar avisos
-          </button>
-          <button type="button" className={styles.secondaryButton} onClick={() => navigate("/admin/banner-home")}>
-            Editar banner
-          </button>
-          <button type="button" className={styles.secondaryButton} onClick={() => navigate("/imagens")}>
-            Gerenciar imagens
-          </button>
-          <button type="button" className={styles.secondaryButton} onClick={() => navigate("/admin/chat-historico")}>
-            Histórico de mensagens
-          </button>
-          <button type="button" className={styles.secondaryButton} onClick={() => navigate("/admin/roleta-premios")}>
-            Roleta de prêmios
-          </button>
-          <button type="button" className={styles.secondaryButton} onClick={voltarPaginaInterna}>
+        <div className={styles.consoleTopActions}>
+          <button type="button" className={styles.consoleGhostButton} onClick={voltarPaginaInterna}>
+            <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
             Voltar
           </button>
-          <button type="button" className={styles.dangerButton} onClick={logout}>
+          <button type="button" className={styles.consoleGhostDanger} onClick={logout}>
+            <LogOut size={16} strokeWidth={2} aria-hidden="true" />
             Sair
           </button>
         </div>
@@ -1878,64 +1930,156 @@ export default function Admin() {
 
       {!erro && (
         <>
-          <section className={styles.adminQuickActions}>
-            <div>
-              <span className={styles.adminQuickActionsEyebrow}>Acessos rápidos</span>
-              <h2>Personalização da intranet</h2>
-              <p>Altere os textos, indicadores e oferta do banner principal sem mudar o design.</p>
-            </div>
-            <div className={styles.headerActions}>
-              <button
-                type="button"
-                className={styles.bannerEditButton}
-                onClick={() => navigate("/admin/banner-home")}
-              >
-                <LayoutTemplate size={19} />
-                Editar banner principal
-              </button>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={() => navigate("/admin/permissoes-compras")}
-              >
-                <ShieldCheck size={18} />
-                Permissões de compras
-              </button>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={() => navigate("/admin/roleta-premios")}
-              >
-                <ShieldCheck size={18} />
-                Roleta de prêmios
-              </button>
-            </div>
-          </section>
+          <div className={styles.consoleLayout}>
+            <nav className={styles.consoleNav} aria-label="Seções do painel administrativo">
+              <ul className={styles.consoleNavList}>
+                {ADMIN_SECOES.map((secao) => {
+                  const { id, label } = secao;
+                  const contagem = contagensSecaoAdmin[id];
+                  const ativo = secaoAdmin === id;
 
-          <section className={styles.metrics}>
-            <div className={styles.metric}>
-              <span>Usuarios</span>
-              <strong>{resumo?.total_usuarios || 0}</strong>
-            </div>
-            <div className={styles.metric}>
-              <span>Online</span>
-              <strong>{resumo?.status?.online || 0}</strong>
-            </div>
-            <div className={styles.metric}>
-              <span>Grupos</span>
-              <strong>{resumo?.total_grupos || 0}</strong>
-            </div>
-          </section>
+                  return (
+                    <li key={id}>
+                      <button
+                        type="button"
+                        className={`${styles.consoleNavItem} ${ativo ? styles.consoleNavItemActive : ""}`}
+                        aria-current={ativo ? "page" : undefined}
+                        onClick={() => abrirSecaoAdmin(id)}
+                      >
+                        <secao.Icone size={18} strokeWidth={1.9} aria-hidden="true" />
+                        <span>{label}</span>
+                        {contagem?.valor > 0 && (
+                          <em className={contagem.alerta ? styles.consoleNavCountAlert : styles.consoleNavCount}>
+                            {contagem.valor}
+                          </em>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
 
-          <div className={styles.columns}>
+              <div className={styles.consoleNavTools}>
+                <span className={styles.consoleNavHeading}>Ferramentas</span>
+                {ADMIN_FERRAMENTAS.map((ferramenta) => (
+                  <button
+                    key={ferramenta.id}
+                    type="button"
+                    className={styles.consoleNavTool}
+                    onClick={() => navigate(ferramenta.rota)}
+                  >
+                    <ferramenta.Icone size={16} strokeWidth={1.9} aria-hidden="true" />
+                    <span>{ferramenta.label}</span>
+                    <ArrowUpRight size={14} strokeWidth={2} aria-hidden="true" className={styles.consoleNavToolArrow} />
+                  </button>
+                ))}
+              </div>
+            </nav>
+
+            <main className={styles.consoleMain}>
+              {secaoAdmin === "visao-geral" && (
+                <div className={styles.consoleOverview}>
+                  <div className={styles.consolePanelHeader}>
+                    <h2>Visão geral</h2>
+                    <p>Resumo da empresa e atalhos de administração.</p>
+                  </div>
+
+                  <div className={styles.consoleStats}>
+                    <button type="button" className={styles.consoleStat} onClick={() => abrirSecaoAdmin("usuarios")}>
+                      <span><Users size={16} strokeWidth={1.9} aria-hidden="true" /> Usuários</span>
+                      <strong>{resumo?.total_usuarios || 0}</strong>
+                    </button>
+                    <div className={styles.consoleStat}>
+                      <span><i className={styles.consoleOnlineDot} aria-hidden="true" /> Online agora</span>
+                      <strong>{resumo?.status?.online || 0}</strong>
+                    </div>
+                    <button type="button" className={styles.consoleStat} onClick={() => abrirSecaoAdmin("grupos")}>
+                      <span><UsersRound size={16} strokeWidth={1.9} aria-hidden="true" /> Grupos</span>
+                      <strong>{resumo?.total_grupos || 0}</strong>
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.consoleStat} ${duvidasPendentes.length > 0 ? styles.consoleStatAttention : ""}`}
+                      onClick={() => abrirSecaoAdmin("duvidas")}
+                    >
+                      <span><MessageCircleQuestion size={16} strokeWidth={1.9} aria-hidden="true" /> Dúvidas pendentes</span>
+                      <strong>{duvidasPendentes.length}</strong>
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.consoleStat} ${feedbacksAbertos > 0 ? styles.consoleStatAttention : ""}`}
+                      onClick={() => abrirSecaoAdmin("feedbacks")}
+                    >
+                      <span><MessageSquareWarning size={16} strokeWidth={1.9} aria-hidden="true" /> Feedbacks abertos</span>
+                      <strong>{feedbacksAbertos}</strong>
+                    </button>
+                  </div>
+
+                  <button type="button" className={styles.consoleNoticeCard} onClick={() => abrirSecaoAdmin("aviso-interno")}>
+                    <span className={styles.consoleNoticeIcon} aria-hidden="true">
+                      <Megaphone size={20} strokeWidth={1.9} />
+                    </span>
+                    <span className={styles.consoleNoticeBody}>
+                      <small className={avisoGeral?.ativo ? styles.consoleNoticeLive : ""}>
+                        {avisoGeral?.ativo ? "Aviso interno ativo" : "Nenhum aviso ativo"}
+                      </small>
+                      <strong>{avisoGeral?.titulo || "Aviso interno obrigatório"}</strong>
+                      <span>
+                        {avisoGeral
+                          ? `${avisoGeral.confirmacoes || 0} confirmações · ${avisoGeral.pendentes || 0} pendentes`
+                          : "Publique um aviso para que todos confirmem a leitura."}
+                      </span>
+                    </span>
+                    <span className={styles.consoleNoticeAction}>
+                      Editar aviso
+                      <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
+                    </span>
+                  </button>
+
+                  <div className={styles.consolePanelHeader}>
+                    <h3>Ferramentas</h3>
+                  </div>
+
+                  <div className={styles.consoleToolsGrid}>
+                    {ADMIN_FERRAMENTAS.map((ferramenta) => (
+                      <button key={ferramenta.id} type="button" className={styles.consoleTool} onClick={() => navigate(ferramenta.rota)}>
+                        <span className={styles.consoleToolIcon} aria-hidden="true">
+                          <ferramenta.Icone size={19} strokeWidth={1.9} />
+                        </span>
+                        <span className={styles.consoleToolText}>
+                          <strong>{ferramenta.label}</strong>
+                          <small>{ferramenta.descricao}</small>
+                        </span>
+                        <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" className={styles.consoleToolArrow} />
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      className={styles.consoleTool}
+                      onClick={testarEfeitoVenda}
+                      disabled={testandoEfeitoVenda}
+                    >
+                      <span className={`${styles.consoleToolIcon} ${styles.consoleToolIconCelebrate}`} aria-hidden="true">
+                        <PartyPopper size={19} strokeWidth={1.9} />
+                      </span>
+                      <span className={styles.consoleToolText}>
+                        <strong>{testandoEfeitoVenda ? "Disparando teste..." : "Testar efeito de venda"}</strong>
+                        <small>Mostra a comemoração de venda só nesta tela.</small>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {secaoAdmin === "usuarios" && (
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <h2>Usuarios</h2>
-                  <p>Setor, permissao administrativa e criacao de acesso.</p>
+                  <h2>Usuários</h2>
+                  <p>Setor, permissão administrativa e criação de acesso.</p>
                 </div>
                 <button type="button" className={styles.primaryButton} onClick={abrirCadastroUsuario}>
-                  Adicionar usuario
+                  Adicionar usuário
                 </button>
               </div>
 
@@ -2024,11 +2168,11 @@ export default function Admin() {
                 <table className={styles.table}>
                   <thead>
                     <tr>
-                      <th>Usuario</th>
+                      <th>Usuário</th>
                       <th>Setor</th>
                       <th>Cargo</th>
                       <th>Mensagens</th>
-                      <th>Acoes</th>
+                      <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2094,7 +2238,9 @@ export default function Admin() {
                 </table>
               </div>
             </section>
+              )}
 
+              {secaoAdmin === "grupos" && (
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -2166,7 +2312,7 @@ export default function Admin() {
                       <th>Membros</th>
                       <th>Mensagens</th>
                       <th>Atualizado</th>
-                      <th>Acoes</th>
+                      <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2223,8 +2369,9 @@ export default function Admin() {
                 </table>
               </div>
             </section>
-          </div>
+              )}
 
+              {secaoAdmin === "aviso-interno" && (
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
@@ -2772,7 +2919,9 @@ export default function Admin() {
               </div>
             </form>
           </section>
+              )}
 
+              {secaoAdmin === "duvidas" && (
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
@@ -2875,7 +3024,9 @@ export default function Admin() {
               </table>
             </div>
           </section>
+              )}
 
+              {secaoAdmin === "feedbacks" && (
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
@@ -3008,6 +3159,9 @@ export default function Admin() {
               </table>
             </div>
           </section>
+              )}
+            </main>
+          </div>
 
           {respostaModalAberto && respostaModalFeedback && (
             <div className={styles.modalOverlay}>

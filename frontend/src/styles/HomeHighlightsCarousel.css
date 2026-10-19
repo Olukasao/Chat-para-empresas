@@ -1,0 +1,279 @@
+/* Carrossel da home: destaques (banner, CCNA, massivos) <-> Novidades.
+   Tokens: public/design-system/acessanet-ds.css */
+
+.anHl {
+  --anHl-bleed: clamp(16px, 4vw, 44px);
+  position: relative;
+  width: min(100%, 1160px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- abas ---------- */
+
+/* setas, abas e trava na mesma linha, alinhadas à direita */
+.anHlControls {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin-bottom: 14px;
+}
+
+.anHlNav {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--an-border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--an-surface) 72%, transparent);
+  backdrop-filter: blur(12px);
+  color: var(--an-text-2);
+  box-shadow: var(--an-shadow-xs);
+  cursor: pointer;
+  transition:
+    color var(--an-dur-fast) var(--an-ease-out),
+    border-color var(--an-dur-fast) var(--an-ease-out),
+    background var(--an-dur-fast) var(--an-ease-out);
+}
+
+.anHlNav:hover {
+  color: var(--an-text);
+  border-color: var(--an-border-strong);
+}
+
+.anHlNav:active {
+  transform: scale(0.94);
+}
+
+.anHlNav:focus-visible {
+  outline: none;
+  box-shadow: var(--an-focus-ring);
+}
+
+/* travado: a trava ganha a cor de destaque para ficar claro que não gira */
+.anHlLockBtn {
+  margin-left: 4px;
+}
+
+.anHlLockBtn.is-locked {
+  color: var(--an-text);
+  border-color: var(--an-accent-border);
+  background: var(--an-accent-soft-strong);
+}
+
+.anHlTabLock {
+  flex: none;
+  opacity: 0.85;
+}
+
+.anHlTabs {
+  min-width: 0;
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--an-border);
+  border-radius: var(--an-radius-pill);
+  background: color-mix(in srgb, var(--an-surface) 72%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--an-shadow-xs);
+}
+
+.anHlTab {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--an-radius-pill);
+  background: transparent;
+  color: var(--an-text-2);
+  font-family: var(--an-font-body);
+  font-size: 13.5px;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+  cursor: pointer;
+  transition: color var(--an-dur-fast) var(--an-ease-out);
+}
+
+.anHlTab:hover {
+  color: var(--an-text);
+}
+
+.anHlTab.is-active {
+  color: var(--an-text);
+}
+
+.anHlTab:focus-visible {
+  outline: none;
+  box-shadow: var(--an-focus-ring);
+}
+
+.anHlTabPill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--an-accent-soft-strong);
+  box-shadow: inset 0 0 0 1px var(--an-accent-border);
+}
+
+.anHlTabLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.anHlTabLabelCurto {
+  display: none;
+}
+
+/* ponto pulsando: tem novidade esperando na outra aba */
+.anHlTabDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--an-cyan-400);
+  box-shadow: 0 0 0 0 rgba(var(--an-cyan-400-rgb), 0.6);
+  animation: anHlDot 2.2s var(--an-ease-out) infinite;
+}
+
+@keyframes anHlDot {
+  0% { box-shadow: 0 0 0 0 rgba(var(--an-cyan-400-rgb), 0.55); }
+  70%, 100% { box-shadow: 0 0 0 7px rgba(var(--an-cyan-400-rgb), 0); }
+}
+
+/* barra de tempo dentro da aba ativa */
+.anHlTabTimer {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--an-blue-400), var(--an-cyan-400));
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.anHlTabTimer:not(.is-manual) {
+  animation: anHlDwell var(--anHl-dwell, 14s) linear forwards;
+}
+
+.anHlTabTimer.is-paused {
+  animation-play-state: paused;
+  opacity: 0.45;
+}
+
+.anHlTabTimer.is-manual {
+  transform: scaleX(0);
+  transition: transform 260ms linear;
+}
+
+@keyframes anHlDwell {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* ---------- palco ---------- */
+
+/* As duas telas ocupam a mesma célula do grid: a altura é a da maior e nada
+   pula quando elas trocam. O clip horizontal esconde o que sai pelos lados
+   sem cortar as sombras verticais. */
+.anHlStage {
+  display: grid;
+  width: calc(100% + var(--anHl-bleed) * 2);
+  margin-inline: calc(var(--anHl-bleed) * -1);
+  padding-inline: var(--anHl-bleed);
+  overflow-x: clip;
+  overflow-y: visible;
+  /* o navegador cuida da rolagem vertical; o deslize lateral troca de card */
+  touch-action: pan-y;
+}
+
+.anHlLayerGroup {
+  grid-area: 1 / 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.anHlLayerGroup[inert] {
+  pointer-events: none;
+}
+
+.anHlLayer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  will-change: transform, opacity, filter;
+}
+
+.anHlNews {
+  align-items: stretch;
+  will-change: transform, opacity, clip-path;
+}
+
+@media (max-width: 640px) {
+  .anHlControls {
+    align-self: stretch;
+    gap: 4px;
+  }
+
+  .anHlTabs {
+    flex: 1;
+  }
+
+  .anHlNav {
+    width: 34px;
+    height: 34px;
+  }
+
+  .anHlLockBtn {
+    margin-left: 0;
+  }
+
+  .anHlTab {
+    flex: 1;
+    padding: 0 10px;
+  }
+
+  .anHlTabLabelLongo {
+    display: none;
+  }
+
+  .anHlTabLabelCurto {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anHlTabDot {
+    animation: none;
+  }
+}
+
+/* Os destaques são mais altos que o card de Novidades (vídeo 16:9): a tela
+   escondida sai do fluxo para o palco não esticar o card nem sobrar vazio. */
+.anHlNews {
+  align-self: start;
+}
+
+.anHlLayerGroup[inert] {
+  height: 0;
+}
+
+/* Celular estreito: o deslize e as abas já trocam de card; as setas saem
+   para os nomes das abas caberem. A trava fica. */
+@media (max-width: 480px) {
+  .anHlNav:not(.anHlLockBtn) {
+    display: none;
+  }
+}
