@@ -1,13 +1,26 @@
 .contratacoes-widget {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
   z-index: 9000;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 10px;
   font-family: inherit;
+}
+
+/* Posição definida pelo arraste: o painel abre para o lado com espaço. */
+.contratacoes-widget.abre-abaixo { flex-direction: column-reverse; }
+.contratacoes-widget.alinha-esquerda { align-items: flex-start; }
+.contratacoes-widget.is-dragging,
+.contratacoes-widget.is-dragging * { user-select: none; }
+
+.contratacoes-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .contratacoes-bubble {
@@ -23,9 +36,13 @@
   background: #1e293b;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s;
+  touch-action: none;
+  cursor: grab;
 }
 
 .contratacoes-bubble:hover { transform: scale(1.06); }
+.is-dragging .contratacoes-bubble { cursor: grabbing; transform: scale(1.1); }
+.contratacoes-bubble:focus-visible { outline: 2px solid #38bdf8; outline-offset: 3px; }
 
 .contratacoes-bubble.is-pending {
   color: #fff;

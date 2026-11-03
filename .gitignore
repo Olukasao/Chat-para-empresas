@@ -51,3 +51,6 @@ backend/.git/
 
 # Originais dos motions (pesados, um passa de 100 MB): o app usa só as versões de src/motions/web
 frontend/src/motions/*.mp4
+
+# Copias de seguranca de dependencias (grandes, nao versionar)
+node_modules.bak*/

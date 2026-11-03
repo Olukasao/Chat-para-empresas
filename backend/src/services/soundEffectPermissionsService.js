@@ -1,9 +1,14 @@
 import db from "../db/db.js";
+import { VOLUME_PADRAO_USUARIO_PERCENT, VOLUME_ABSOLUTO_PERCENT, limitarVolumePercent } from "./soundEffectVolume.js";
 
 let soundEffectPermissionsTabelaGarantida = false;
 let soundEffectPermissionsTabelaGarantidaPromise = null;
 
 const DEFAULT_OWNER_MATCH = "lucas";
+// O dono padrão pode disparar com volume amplificado; os demais ficam no limite da coluna max_volume_percent.
+// O dono padrão dispara sem espera entre os sons (desligue com SOUND_EFFECT_OWNER_NO_TIME_LIMIT=false).
+const donoSemLimiteDeTempo = () => String(process.env.SOUND_EFFECT_OWNER_NO_TIME_LIMIT ?? "true").trim().toLowerCase() !== "false";
+const obterVolumeMaximoDono = () => limitarVolumePercent(process.env.SOUND_EFFECT_OWNER_MAX_VOLUME_PERCENT, VOLUME_ABSOLUTO_PERCENT);
 const DEFAULT_TARGET_GROUP_NAME = "NOC";
 const BLOCKED_TARGET_FIRST_NAMES = ["samuel", "diego", "carlos", "dalton"];
 const BLOCKED_TARGET_USER_IDS = new Set([31]); // Leonardo Silva
@@ -106,6 +111,16 @@ export const garantirTabelaPermissoesEfeitosSonoros = async () => {
             ADD COLUMN IF NOT EXISTS granted_by INT NULL
         `);
 
+        await db.query(`
+            ALTER TABLE sound_effect_permissions
+            ADD COLUMN IF NOT EXISTS max_volume_percent SMALLINT NOT NULL DEFAULT ${VOLUME_PADRAO_USUARIO_PERCENT}
+        `);
+
+        await db.query(`
+            ALTER TABLE sound_effect_permissions
+            ADD COLUMN IF NOT EXISTS no_time_limit TINYINT(1) NOT NULL DEFAULT 0
+        `);
+
         soundEffectPermissionsTabelaGarantida = true;
     })();
 
@@ -202,17 +217,21 @@ export const obterPermissaoEfeitosSonoros = async (usuario = {}) => {
     }
 
     const [rows] = await db.query(`
-        SELECT can_use, can_manage
+        SELECT can_use, can_manage, max_volume_percent, no_time_limit
         FROM sound_effect_permissions
         WHERE user_id = ?
         LIMIT 1
     `, [usuario.id]);
 
     const permissao = rows[0] || {};
+    const maxDaColuna = limitarVolumePercent(permissao.max_volume_percent);
+    const maxVolume = usuarioCombinaComDonoPadrao(usuario) ? Math.max(maxDaColuna, obterVolumeMaximoDono()) : maxDaColuna;
 
     return {
         can_use: Boolean(permissao.can_use || permissao.can_manage),
         can_manage: Boolean(permissao.can_manage),
+        max_volume_percent: maxVolume,
+        no_time_limit: Boolean(permissao.no_time_limit) || (usuarioCombinaComDonoPadrao(usuario) && donoSemLimiteDeTempo()),
     };
 };
 
@@ -299,6 +318,8 @@ export const listarPermissoesEfeitosSonoros = async (usuario = {}) => {
             s.nome AS setor_nome,
             COALESCE(sep.can_use, 0) AS can_use,
             COALESCE(sep.can_manage, 0) AS can_manage,
+            COALESCE(sep.max_volume_percent, ${VOLUME_PADRAO_USUARIO_PERCENT}) AS max_volume_percent,
+            COALESCE(sep.no_time_limit, 0) AS no_time_limit,
             sep.granted_by,
             sep.updated_at
         FROM usuarios u
@@ -313,6 +334,10 @@ export const listarPermissoesEfeitosSonoros = async (usuario = {}) => {
         ...row,
         can_use: Boolean(row.can_use || row.can_manage),
         can_manage: Boolean(row.can_manage),
+        max_volume_percent: usuarioCombinaComDonoPadrao(row)
+            ? Math.max(limitarVolumePercent(row.max_volume_percent), obterVolumeMaximoDono())
+            : limitarVolumePercent(row.max_volume_percent),
+        no_time_limit: Boolean(row.no_time_limit) || (usuarioCombinaComDonoPadrao(row) && donoSemLimiteDeTempo()),
     }));
 };
 
@@ -365,4 +390,66 @@ export const definirPermissaoUsoEfeitosSonoros = async ({
     }
 
     return alvo;
+};
+
+/** Define até quantos % de volume uma pessoa pode usar ao disparar (0 a 200). Só quem gerencia os efeitos. */
+export const definirVolumeMaximoEfeitosSonoros = async ({ usuario, targetUserId, percent } = {}) => {
+    await garantirTabelaPermissoesEfeitosSonoros();
+
+    const idAlvo = Number(targetUserId);
+    const maximo = Number(percent);
+    if (!Number.isInteger(idAlvo) || idAlvo <= 0 || !Number.isFinite(maximo)) {
+        const error = new Error("Informe o usuário e um volume de 0 a 200.");
+        error.status = 400;
+        throw error;
+    }
+
+    const [usuarios] = await db.query(`
+        SELECT id FROM usuarios WHERE id = ? AND empresa_id = ? AND deletado_em IS NULL LIMIT 1
+    `, [idAlvo, usuario.empresa_id]);
+    if (!usuarios[0]) {
+        const error = new Error("Usuário não encontrado.");
+        error.status = 404;
+        throw error;
+    }
+
+    const valor = limitarVolumePercent(maximo);
+    await db.query(`
+        INSERT INTO sound_effect_permissions (user_id, can_use, can_manage, granted_by, max_volume_percent)
+        VALUES (?, 0, 0, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            max_volume_percent = VALUES(max_volume_percent),
+            granted_by = VALUES(granted_by)
+    `, [idAlvo, usuario.id, valor]);
+
+    return valor;
+};
+
+/** Liga ou desliga a dispensa dos tempos de espera (limite por minuto e espera por funcionário). Só quem gerencia. */
+export const definirSemLimiteDeTempoEfeitosSonoros = async ({ usuario, targetUserId, enabled } = {}) => {
+    await garantirTabelaPermissoesEfeitosSonoros();
+
+    const idAlvo = Number(targetUserId);
+    if (!Number.isInteger(idAlvo) || idAlvo <= 0) {
+        const error = new Error("Usuário inválido.");
+        error.status = 400;
+        throw error;
+    }
+
+    const [usuarios] = await db.query(`
+        SELECT id FROM usuarios WHERE id = ? AND empresa_id = ? AND deletado_em IS NULL LIMIT 1
+    `, [idAlvo, usuario.empresa_id]);
+    if (!usuarios[0]) {
+        const error = new Error("Usuário não encontrado.");
+        error.status = 404;
+        throw error;
+    }
+
+    await db.query(`
+        INSERT INTO sound_effect_permissions (user_id, can_use, can_manage, granted_by, no_time_limit)
+        VALUES (?, 0, 0, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            no_time_limit = VALUES(no_time_limit),
+            granted_by = VALUES(granted_by)
+    `, [idAlvo, usuario.id, enabled ? 1 : 0]);
 };

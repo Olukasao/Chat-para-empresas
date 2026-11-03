@@ -18,6 +18,13 @@ import { userHasNetworkDiagnosticPermission } from './services/networkDiagnostic
 import { getJwtSecret } from './config/authSecrets.js';
 import { lerCookieAgenda, validarSessaoAgenda } from './services/agendaSessionService.js';
 import { iniciarAgendaTecnicosResumo } from './services/agendaTecnicosResumoService.js';
+import { iniciarBriefing } from './services/briefingService.js';
+import { iniciarLembretes } from './services/lembretesAlarme.js';
+import { iniciarMonitorOlt } from './services/oltCloudService.js';
+import { usuarioPodeVerRedeOlt } from './Routes/oltRoutes.js';
+import { dashboardRelay } from './services/dashboardRelayService.js';
+import { registrarWorkspace, removerWorkspace } from './services/workspacePresenceService.js';
+import { dispositivoValido, marcarSaida, registrarVisto } from './services/workspaceDispositivosService.js';
 import {
     iniciarContratacoesPendentes,
     obterResumoContratacoes,
@@ -28,12 +35,26 @@ import { getAllowedSoundEffect, PUBLIC_SOUNDS_ROOT } from './services/soundEffec
 import {
     buscarUsuarioAlvoEfeitoSonoro,
     obterNomeGrupoAlvoEfeitosSonoros,
-    usuarioPodeUsarEfeitosSonoros,
+    obterPermissaoEfeitosSonoros,
 } from './services/soundEffectPermissionsService.js';
+import { resolverVolumePercent, VOLUME_PADRAO_PERCENT } from './services/soundEffectVolume.js';
+import { registrarAppDownload } from './services/appDownload.js';
+import { criarParsersDeCorpo } from './security/bodyLimits.js';
+import { aplicarCabecalhosUpload } from './security/uploadSecurity.js';
+import {
+    criarAutorizadorSocket,
+    criarMiddlewareAutenticacaoSocket,
+    identidadeDoSocket,
+    lerModoAutenticacaoSocket,
+    normalizarIdSocket,
+    verificarJwtHS256,
+} from './security/socketSecurity.js';
 
 const app = express();
-const REQUEST_BODY_LIMIT = '750mb';
-const SOCKET_MAX_BUFFER_SIZE = 750 * 1024 * 1024;
+// Limites de corpo: 1 MB por padrão (src/security/bodyLimits.js; rotas maiores listadas lá).
+// Anexos trafegam por upload multipart (/api/chat/upload); o socket só leva texto/URL, então 10 MB sobra.
+const SOCKET_MAX_BUFFER_SIZE = (Number(process.env.SOCKET_MAX_BUFFER_MB) || 10) * 1024 * 1024;
+const SOCKET_AUTH_MODE = lerModoAutenticacaoSocket();
 const NETWORK_DIAGNOSTIC_RUN_ID_REGEX = /^nd_[a-zA-Z0-9_-]{8,80}$/;
 const SOUND_EFFECT_MAX_VOLUME = 0.7;
 const SOUND_EFFECT_DEFAULT_VOLUME = 0.6;
@@ -96,11 +117,23 @@ app.use(helmet({
     hsts: false,
     referrerPolicy: { policy: 'no-referrer' },
 }));
-app.use(express.json({ limit: REQUEST_BODY_LIMIT }));
-app.use(express.urlencoded({ extended: true, limit: REQUEST_BODY_LIMIT }));
+const parsersDeCorpo = criarParsersDeCorpo({
+    // Só confere a assinatura (sem banco) antes de ler corpo grande.
+    verificarAssinatura: (token) => {
+        try {
+            verificarJwtHS256(token, getJwtSecret());
+            return true;
+        } catch {
+            return false;
+        }
+    },
+});
+app.use(parsersDeCorpo.json);
+app.use(parsersDeCorpo.urlencoded);
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
+registrarAppDownload(app);
 app.use("/api", route);
 
 const emailSignaturesPath = path.resolve(__dirname, '../../email-signatures');
@@ -159,21 +192,23 @@ if (fs.existsSync(PUBLIC_SOUNDS_ROOT)) {
         setHeaders: (res) => {
             res.setHeader('X-Content-Type-Options', 'nosniff');
             res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+            // Os sons são públicos; o app precisa dessa permissão para amplificar (acima de 100%) o áudio vindo do Chat.
+            res.setHeader('Access-Control-Allow-Origin', '*');
         },
     }));
 }
 
 app.use('/uploads/chat', express.static(chatUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 
 app.use('/uploads/stickers', express.static(stickerUploadsPath, {
     immutable: true,
     maxAge: '30d',
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
         res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
     },
 }));
@@ -181,55 +216,55 @@ app.use('/uploads/stickers', express.static(stickerUploadsPath, {
 app.use('/uploads/wallpapers', express.static(wallpaperUploadsPath, {
     immutable: true,
     maxAge: '30d',
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
         res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
     },
 }));
 
 app.use('/uploads/wiki', express.static(wikiUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/solicitacoes', express.static(internalRequestsUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/compras', express.static(purchaseUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/vendas', express.static(salesUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/ccna-competition', express.static(ccnaCompetitionUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/banner-home', express.static(bannerHomeUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/avisos', express.static(avisosUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/roulette', express.static(rouletteUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.use('/uploads/imagens', express.static(imagensGaleriaUploadsPath, {
-    setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+    setHeaders: (res, filePath) => {
+        aplicarCabecalhosUpload(res, filePath);
     },
 }));
 app.get(/^\/uploads\/wiki\/.*/, (_req, res) => {
@@ -258,6 +293,7 @@ if (fs.existsSync(frontendIndexPath)) {
 
 app.use((err, _req, res, _next) => {
     if (err?.type === 'entity.too.large') {
+        console.warn(`[APP] Corpo acima do limite recusado: ${_req.method} ${String(_req.originalUrl || '').split('?')[0]} (${err.length || '?'} bytes)`);
         return res.status(413).json({ success: false, message: 'Requisição muito grande.' });
     }
 
@@ -281,8 +317,47 @@ const io = new Server(server, {
 
 app.set('io', io);
 
+const buscarUsuarioDoSocket = async (id) => {
+    const usuarioId = normalizarIdSocket(id);
+    if (!usuarioId) return null;
+    const [rows] = await db.query(`
+        SELECT u.id, u.nome, u.email, u.avatar, u.empresa_id, u.setor_id, s.nome AS setor_nome, u.perfil
+        FROM usuarios u
+        LEFT JOIN setores s ON s.id = u.setor_id
+        WHERE u.id = ? AND u.deletado_em IS NULL
+        LIMIT 1
+    `, [usuarioId]);
+    return rows[0] || null;
+};
+
+// Autenticação no handshake (C1). Modo em SOCKET_AUTH_MODE: enforce (padrão) | log | off.
+io.use(criarMiddlewareAutenticacaoSocket({
+    modo: SOCKET_AUTH_MODE,
+    verificarToken: (token) => verificarJwtHS256(token, getJwtSecret()),
+    buscarUsuario: buscarUsuarioDoSocket,
+    sessaoAgenda: (socket) => validarSessaoAgenda(lerCookieAgenda(socket.handshake?.headers?.cookie)),
+}));
+console.log(`[SOCKET] Autenticação do handshake em modo "${SOCKET_AUTH_MODE}"`);
+
+const autorizador = criarAutorizadorSocket(db);
+
 // Situação da agenda de técnicos para o card da home (evento agenda-tecnicos:resumo).
 iniciarAgendaTecnicosResumo(io);
+iniciarBriefing(io);
+iniciarLembretes(io);
+dashboardRelay.start();
+
+// Incidentes de rede da OLT Cloud: quem tem acesso à rede entra na sala "olt_watchers" e recebe o aviso de novos incidentes.
+// Só liga se as credenciais da OLT Cloud estiverem no .env (OLTCLOUD_*).
+iniciarMonitorOlt({
+    aoEventoMassa: (p) => io.to('olt_watchers').emit('olt_evento_massa', {
+        semEnergia: p.semEnergia, loss: p.loss, aumento: p.aumento, olts: p.porOlt.slice(0, 3).map((o) => o.olt),
+    }),
+    aoSurgir: (i) => io.to('olt_watchers').emit('olt_incidente_novo', {
+        id: i.id, tipo: i.tipo, olt: i.olt, pon: i.pon, slotPon: i.slotPon, cto: i.cto,
+        dispositivosAtivos: i.dispositivosAtivos, totalDispositivos: i.totalDispositivos, inicio: i.inicio,
+    }),
+});
 
 // Contratações pendentes do site (eventos contratacoes:resumo e contratacoes:novo).
 iniciarContratacoesPendentes(io);
@@ -523,7 +598,7 @@ const autenticarSocketUsuario = async (socket) => {
         throw new Error('Token ausente');
     }
 
-    const decoded = jwt.verify(token, getJwtSecret());
+    const decoded = verificarJwtHS256(token, getJwtSecret());
     const [rows] = await db.query(`
         SELECT u.id, u.nome, u.email, u.empresa_id, u.setor_id, s.nome AS setor_nome, u.perfil
         FROM usuarios u
@@ -911,6 +986,27 @@ const entrarSalasDoUsuario = async (socket, { usuarioId, empresaId, motivo = 'sy
     };
 };
 
+// Identidade efetiva do socket. Autenticado: vem do JWT (payload do cliente é ignorado).
+// Sem identidade só é possível em SOCKET_AUTH_MODE=log/off (clientes antigos): aí cai no comportamento legado.
+const identidadeEfetiva = (socket, data = {}) => {
+    const ident = identidadeDoSocket(socket);
+    if (ident) return ident;
+    if (SOCKET_AUTH_MODE === 'enforce') return null;
+
+    const usuarioId = normalizarIdSocket(socket.data.usuarioId ?? data?.remetente_id ?? data?.usuario_id);
+    if (!usuarioId) return null;
+    return {
+        usuarioId,
+        empresaId: normalizarIdSocket(socket.data.empresaId ?? data?.empresa_id),
+        user: { id: usuarioId, nome: data?.remetente_nome ?? data?.usuario_nome ?? null, avatar: data?.remetente_avatar ?? null, perfil: null, setor_id: null },
+        legado: true,
+    };
+};
+
+const recusarSocket = (socket, mensagem = 'Operação não permitida') => {
+    socket.emit('socket_error', { error: mensagem });
+};
+
 io.on('connection', (socket) => {
     console.log(`[SOCKET] Novo cliente conectado: ${socket.id}`);
 
@@ -922,14 +1018,25 @@ io.on('connection', (socket) => {
     socket.on('user_connect', async (data) => {
         try {
             const { usuario_id, empresa_id } = data || {};
+            const ident = socket.data.user
+                ? identidadeDoSocket(socket)
+                : (SOCKET_AUTH_MODE === 'enforce' ? null : {
+                    usuarioId: normalizarIdSocket(usuario_id),
+                    empresaId: normalizarIdSocket(empresa_id),
+                });
 
-            if (!usuario_id || !empresa_id) {
+            if (!ident?.usuarioId || !ident?.empresaId) {
                 socket.emit('socket_error', { error: 'Dados do usuário ausentes' });
                 return;
             }
 
-            const usuarioId = normalizarId(usuario_id);
-            const empresaId = normalizarId(empresa_id);
+            // Identidade vem do token; usuario_id/empresa_id do payload são ignorados (só registramos a divergência).
+            if (socket.data.user && usuario_id && normalizarIdSocket(usuario_id) !== ident.usuarioId) {
+                console.warn(`[SOCKET-AUTH] user_connect com usuario_id divergente do token: token=${ident.usuarioId} payload=${usuario_id} socket=${socket.id}`);
+            }
+
+            const usuarioId = normalizarId(ident.usuarioId);
+            const empresaId = normalizarId(ident.empresaId);
             const jaEstavaOnline = usuarioEstaConectado(usuarioId);
 
             // Salvar conexão do usuário
@@ -965,6 +1072,34 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error('Erro ao conectar usuário no socket:', err);
             socket.emit('socket_error', { error: 'Erro ao conectar ao chat' });
+        }
+    });
+
+    // Aplicativo Acessa Workspace aberto: entra na lista "quem está usando o app" do painel admin.
+    // A identidade vem do token do socket; do cliente só aceitamos o número da versão.
+    socket.on('workspace_presence', async (data) => {
+        try {
+            const usuario = await autenticarSocketUsuario(socket);
+            const dispositivo = dispositivoValido(data?.dispositivo);
+            registrarWorkspace(socket.id, {
+                usuarioId: usuario.id,
+                empresaId: usuario.empresa_id,
+                versao: data?.versao,
+                dispositivo,
+            });
+            // Guarda o computador (quem, de onde, qual versão) para o painel de versões; uma falha aqui não derruba a presença.
+            registrarVisto({
+                empresaId: usuario.empresa_id,
+                usuarioId: usuario.id,
+                dispositivo,
+                computador: data?.computador,
+                ip: socket.handshake?.headers?.['x-forwarded-for']?.split(',')[0] || socket.handshake?.address,
+                versao: data?.versao,
+            }).catch((e) => console.error('[SOCKET] Não registrou o computador:', e.message));
+            socket.data.workspaceEmpresaId = usuario.empresa_id;
+            io.to(`empresa_${usuario.empresa_id}`).emit('workspace_presence_changed');
+        } catch (err) {
+            console.error('[SOCKET] Presença do Workspace recusada:', err.message);
         }
     });
 
@@ -1023,20 +1158,21 @@ io.on('connection', (socket) => {
 
     socket.on('join_user_groups', async (data = {}) => {
         try {
-            const usuarioId = data.usuario_id || socket.data.usuarioId;
-            const empresaId = data.empresa_id || socket.data.empresaId;
+            const ident = identidadeDoSocket(socket) || (SOCKET_AUTH_MODE === 'enforce' ? null : {
+                usuarioId: normalizarIdSocket(socket.data.usuarioId || data.usuario_id),
+                empresaId: normalizarIdSocket(socket.data.empresaId || data.empresa_id),
+            });
+            const usuarioId = ident?.usuarioId;
+            const empresaId = ident?.empresaId;
 
             if (!usuarioId || !empresaId) {
                 socket.emit('socket_error', { error: 'Dados do usuário ausentes para sincronizar grupos' });
                 return;
             }
 
-            if (
-                socket.data.usuarioId &&
-                normalizarId(usuarioId) !== normalizarId(socket.data.usuarioId)
-            ) {
+            if (data.usuario_id && normalizarId(data.usuario_id) !== normalizarId(usuarioId)) {
                 console.warn(
-                    `[SOCKET] Tentativa de sincronizar grupos de outro usuário: socket=${socket.data.usuarioId}, payload=${usuarioId}`
+                    `[SOCKET] Tentativa de sincronizar grupos de outro usuário: socket=${usuarioId}, payload=${data.usuario_id}`
                 );
                 socket.emit('socket_error', { error: 'Usuário inválido para sincronizar grupos' });
                 return;
@@ -1097,13 +1233,16 @@ io.on('connection', (socket) => {
         let sound = null;
         let soundKey = null;
         let volume = SOUND_EFFECT_DEFAULT_VOLUME;
+        let volumePercent = VOLUME_PADRAO_PERCENT;
 
         const responder = (payload) => emitirRespostaEfeitoSonoro(socket, callback, payload);
 
         try {
             admin = await autenticarSocketUsuario(socket);
 
-            if (!(await usuarioPodeUsarEfeitosSonoros(admin))) {
+            const permissaoSom = await obterPermissaoEfeitosSonoros(admin);
+
+            if (!(permissaoSom.can_use || permissaoSom.can_manage)) {
                 await registrarLogEfeitoSonoro({
                     admin,
                     soundKey: normalizarSoundKey(data.sound_key || data.sound),
@@ -1120,7 +1259,9 @@ io.on('connection', (socket) => {
 
             soundKey = normalizarSoundKey(data.sound_key || data.sound);
             sound = getAllowedSoundEffect(soundKey);
-            volume = normalizarVolumeEfeitoSonoro(data.volume);
+            // O volume pedido nunca passa do limite de quem dispara (70% por padrão; o dono pode mais, até 200%).
+            volumePercent = resolverVolumePercent(data, permissaoSom.max_volume_percent);
+            volume = volumePercent / 100;
 
             if (!sound) {
                 await registrarLogEfeitoSonoro({
@@ -1204,7 +1345,9 @@ io.on('connection', (socket) => {
             }
 
             const agora = Date.now();
-            const limiteAdmin = obterLimiteAdminEfeitoSonoro(admin.id, agora);
+            // Quem tem "sem limite de tempo" (o dono, por padrão) dispara sem as esperas abaixo.
+            const semLimiteTempo = Boolean(permissaoSom.no_time_limit);
+            const limiteAdmin = semLimiteTempo ? { permitido: true } : obterLimiteAdminEfeitoSonoro(admin.id, agora);
 
             if (!limiteAdmin.permitido) {
                 const segundos = formatarEsperaSegundos(limiteAdmin.retryAfterMs);
@@ -1227,7 +1370,7 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            const cooldownAlvo = obterCooldownAlvoEfeitoSonoro(admin.empresa_id, targetUserId, agora);
+            const cooldownAlvo = semLimiteTempo ? { permitido: true } : obterCooldownAlvoEfeitoSonoro(admin.empresa_id, targetUserId, agora);
 
             if (!cooldownAlvo.permitido) {
                 const segundos = formatarEsperaSegundos(cooldownAlvo.retryAfterMs);
@@ -1250,14 +1393,18 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            registrarEnvioAdminEfeitoSonoro(admin.id, agora);
-            registrarCooldownAlvoEfeitoSonoro(cooldownAlvo.cooldownKey, agora);
+            if (!semLimiteTempo) {
+                registrarEnvioAdminEfeitoSonoro(admin.id, agora);
+                registrarCooldownAlvoEfeitoSonoro(cooldownAlvo.cooldownKey, agora);
+            }
 
             const payload = {
                 sound: sound.path,
                 sound_key: soundKey,
                 label: sound.label,
-                volume,
+                // `volume` (fração até 1) continua valendo para os apps antigos; `volume_percent` pode passar de 100.
+                volume: Math.min(1, volume),
+                volume_percent: volumePercent,
                 requested_by: admin.nome,
                 created_at: new Date().toISOString(),
             };
@@ -1313,6 +1460,14 @@ io.on('connection', (socket) => {
     // Usuário desconecta
     socket.on('disconnect', async () => {
         const presenca = removerUsuarioConectado(socket);
+        const saiu = removerWorkspace(socket.id);
+        if (saiu) {
+            io.to(`empresa_${socket.data.workspaceEmpresaId}`).emit('workspace_presence_changed');
+            if (saiu.dispositivo) {
+                marcarSaida({ empresaId: saiu.empresaId, usuarioId: saiu.usuarioId, dispositivo: saiu.dispositivo })
+                    .catch((e) => console.error('[SOCKET] Não carimbou a saída do computador:', e.message));
+            }
+        }
 
         if (presenca?.ficouOffline) {
             try {
@@ -1343,10 +1498,26 @@ io.on('connection', (socket) => {
     // ========================================
 
     // Usuário entra em conversa direta
-    socket.on('join_direct_chat', (data) => {
-        const { conversa_id } = data;
-        socket.join(`conversa_${conversa_id}`);
-        console.log(`[SOCKET] Usuário entrou em conversa ${conversa_id}`);
+    socket.on('join_direct_chat', async (data) => {
+        try {
+            const ident = identidadeEfetiva(socket, data);
+            const conversa = ident && await autorizador.participanteDaConversa(ident.usuarioId, data?.conversa_id);
+            if (!conversa) {
+                console.warn(`[SOCKET-AUTH] join_direct_chat negado: usuario=${ident?.usuarioId || '-'} conversa=${data?.conversa_id}`);
+                return recusarSocket(socket, 'Você não tem acesso a esta conversa');
+            }
+            socket.join(`conversa_${conversa.id}`);
+        } catch (err) {
+            console.error('Erro ao entrar na conversa direta:', err);
+        }
+    });
+
+    // Quem pode ver a rede entra na sala que recebe os avisos de incidente novo (a permissão é checada aqui, no servidor).
+    socket.on('olt_watch', async () => {
+        try {
+            const usuario = await autenticarSocketUsuario(socket);
+            if (await usuarioPodeVerRedeOlt(usuario)) socket.join('olt_watchers');
+        } catch { /* sem permissão ou sessão inválida: não entra */ }
     });
 
     socket.on('leave_direct_chat', (data) => {
@@ -1359,13 +1530,29 @@ io.on('connection', (socket) => {
     // Enviar mensagem direta
     socket.on('send_direct_message', async (data) => {
         try {
+            const ident = identidadeEfetiva(socket, data);
+            const conversa = ident && await autorizador.participanteDaConversa(ident.usuarioId, data?.conversa_id);
+            if (!conversa) {
+                console.warn(`[SOCKET-AUTH] send_direct_message negado: usuario=${ident?.usuarioId || '-'} conversa=${data?.conversa_id}`);
+                return recusarSocket(socket, 'Você não tem acesso a esta conversa');
+            }
+            if (data.id && !(await autorizador.mensagemPertenceAoRemetente({
+                mensagemId: data.id,
+                remetenteId: ident.usuarioId,
+                conversaId: conversa.id,
+            }))) {
+                console.warn(`[SOCKET-AUTH] send_direct_message com mensagem que não é do remetente: usuario=${ident.usuarioId} msg=${data.id}`);
+                return recusarSocket(socket, 'Mensagem inválida');
+            }
+
+            // Remetente, destinatário e conversa são sempre derivados do socket/banco, nunca do payload.
+            const remetente_id = ident.usuarioId;
+            const usuario_id = conversa.outroId;
+            const conversa_id = conversa.id;
+            const remetente_nome = ident.user.nome ?? data.remetente_nome;
+            const remetente_avatar = ident.legado ? data.remetente_avatar : (ident.user.avatar ?? data.remetente_avatar);
             const {
-                remetente_id,
-                usuario_id,
-                conversa_id,
                 mensagem,
-                remetente_nome,
-                remetente_avatar,
                 tipo_mensagem = 'texto',
                 anexo_nome = null,
                 anexo_mime = null,
@@ -1465,8 +1652,15 @@ io.on('connection', (socket) => {
 
     // Marcar conversa como lida
     socket.on('mark_conversa_read', async (data) => {
-        const { conversa_id, usuario_id } = data;
         try {
+            const ident = identidadeEfetiva(socket, data);
+            const conversa = ident && await autorizador.participanteDaConversa(ident.usuarioId, data?.conversa_id);
+            if (!conversa) {
+                console.warn(`[SOCKET-AUTH] mark_conversa_read negado: usuario=${ident?.usuarioId || '-'} conversa=${data?.conversa_id}`);
+                return;
+            }
+            const conversa_id = conversa.id;
+            const usuario_id = ident.usuarioId;
             const [mensagensParaMarcar] = await db.query(`
                 SELECT id, remetente_id, conversa_direta_id
                 FROM mensagens
@@ -1498,9 +1692,11 @@ io.on('connection', (socket) => {
 
     socket.on('mark_group_read', async (data) => {
         const { grupo_id } = data || {};
-        const usuario_id = socket.data.usuarioId || data?.usuario_id;
+        const ident = identidadeEfetiva(socket, data);
+        const usuario_id = ident?.usuarioId;
 
         try {
+            if (!usuario_id || !(await autorizador.membroDoGrupo(usuario_id, grupo_id))) return;
             await marcarMensagensGrupoDoUsuario({
                 usuarioId: usuario_id,
                 grupoId: grupo_id,
@@ -1511,30 +1707,48 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('message_deleted', (data) => {
-        const {
-            id,
-            conversa_id = null,
-            grupo_id = null,
-            escopo = 'todos',
-        } = data || {};
-
-        if (!id || escopo !== 'todos') return;
-
-        if (conversa_id) {
-            io.to(`conversa_${conversa_id}`).emit('message_deleted', {
+    socket.on('message_deleted', async (data) => {
+        try {
+            const {
                 id,
-                conversa_id,
-                escopo,
-            });
-        }
+                conversa_id = null,
+                grupo_id = null,
+                escopo = 'todos',
+            } = data || {};
 
-        if (grupo_id) {
-            io.to(`grupo_${grupo_id}`).emit('message_deleted', {
-                id,
-                grupo_id,
-                escopo,
-            });
+            if (!id || escopo !== 'todos') return;
+
+            const ident = identidadeEfetiva(socket, data);
+            if (!ident) return;
+            const usuario = { ...ident.user, id: ident.usuarioId };
+
+            if (conversa_id) {
+                const conversa = await autorizador.participanteDaConversa(ident.usuarioId, conversa_id);
+                if (conversa && await autorizador.podeAnunciarExclusao({ usuario, mensagemId: id, conversaId: conversa.id })) {
+                    io.to(`conversa_${conversa.id}`).emit('message_deleted', {
+                        id,
+                        conversa_id: conversa.id,
+                        escopo,
+                    });
+                } else {
+                    console.warn(`[SOCKET-AUTH] message_deleted negado: usuario=${ident.usuarioId} conversa=${conversa_id} msg=${id}`);
+                }
+            }
+
+            if (grupo_id) {
+                if (await autorizador.membroDoGrupo(ident.usuarioId, grupo_id)
+                    && await autorizador.podeAnunciarExclusao({ usuario, mensagemId: id, grupoId: grupo_id })) {
+                    io.to(`grupo_${grupo_id}`).emit('message_deleted', {
+                        id,
+                        grupo_id,
+                        escopo,
+                    });
+                } else {
+                    console.warn(`[SOCKET-AUTH] message_deleted negado: usuario=${ident.usuarioId} grupo=${grupo_id} msg=${id}`);
+                }
+            }
+        } catch (err) {
+            console.error('Erro ao propagar exclusão de mensagem:', err);
         }
     });
 
@@ -1545,7 +1759,7 @@ io.on('connection', (socket) => {
     // Usuário entra em grupo
     socket.on('join_group', async (data) => {
         const { grupo_id } = data || {};
-        const usuarioId = socket.data.usuarioId;
+        const usuarioId = identidadeEfetiva(socket, data)?.usuarioId;
 
         if (!grupo_id || !usuarioId) {
             socket.emit('socket_error', { error: 'Não foi possível entrar no grupo' });
@@ -1594,13 +1808,28 @@ io.on('connection', (socket) => {
     // Enviar mensagem de grupo
     socket.on('send_group_message', async (data) => {
         try {
+            const ident = identidadeEfetiva(socket, data);
+            if (!ident || !(await autorizador.membroDoGrupo(ident.usuarioId, data?.grupo_id))) {
+                console.warn(`[SOCKET-AUTH] send_group_message negado: usuario=${ident?.usuarioId || '-'} grupo=${data?.grupo_id}`);
+                return recusarSocket(socket, 'Você não tem acesso a este grupo');
+            }
+            if (data.id && !(await autorizador.mensagemPertenceAoRemetente({
+                mensagemId: data.id,
+                remetenteId: ident.usuarioId,
+                grupoId: data.grupo_id,
+            }))) {
+                console.warn(`[SOCKET-AUTH] send_group_message com mensagem que não é do remetente: usuario=${ident.usuarioId} msg=${data.id}`);
+                return recusarSocket(socket, 'Mensagem inválida');
+            }
+
+            // Remetente sempre derivado do socket.
+            const remetente_id = ident.usuarioId;
+            const remetente_nome = ident.user.nome ?? data.remetente_nome;
+            const remetente_avatar = ident.legado ? data.remetente_avatar : (ident.user.avatar ?? data.remetente_avatar);
             const {
-                remetente_id,
                 grupo_id,
                 grupo_nome = null,
                 mensagem,
-                remetente_nome,
-                remetente_avatar,
                 tipo_mensagem = 'texto',
                 anexo_nome = null,
                 anexo_mime = null,
@@ -1694,38 +1923,48 @@ io.on('connection', (socket) => {
     // ========================================
 
     // Usuário está digitando (direto)
+    // Os eventos de digitação só valem para salas em que este socket já entrou (entrada validada no servidor);
+    // quem digita é sempre o usuário do socket.
     socket.on('typing_direct', (data) => {
-        const { conversa_id, usuario_id, usuario_nome } = data;
+        const { conversa_id } = data || {};
+        const ident = identidadeEfetiva(socket, data);
+        if (!ident || !socket.rooms.has(`conversa_${conversa_id}`)) return;
         socket.to(`conversa_${conversa_id}`).emit('user_typing_direct', {
-            usuario_id,
-            usuario_nome
+            usuario_id: ident.usuarioId,
+            usuario_nome: ident.user.nome ?? data.usuario_nome
         });
     });
 
     // Parou de digitar (direto)
     socket.on('stop_typing_direct', (data) => {
-        const { conversa_id, usuario_id } = data;
+        const { conversa_id } = data || {};
+        const ident = identidadeEfetiva(socket, data);
+        if (!ident || !socket.rooms.has(`conversa_${conversa_id}`)) return;
         socket.to(`conversa_${conversa_id}`).emit('user_stop_typing_direct', {
-            usuario_id
+            usuario_id: ident.usuarioId
         });
     });
 
     // Usuário está digitando (grupo)
     socket.on('typing_group', (data) => {
-        const { grupo_id, usuario_id, usuario_nome } = data;
+        const { grupo_id } = data || {};
+        const ident = identidadeEfetiva(socket, data);
+        if (!ident || !socket.rooms.has(`grupo_${grupo_id}`)) return;
         socket.to(`grupo_${grupo_id}`).emit('user_typing_group', {
             grupo_id,
-            usuario_id,
-            usuario_nome
+            usuario_id: ident.usuarioId,
+            usuario_nome: ident.user.nome ?? data.usuario_nome
         });
     });
 
     // Parou de digitar (grupo)
     socket.on('stop_typing_group', (data) => {
-        const { grupo_id, usuario_id } = data;
+        const { grupo_id } = data || {};
+        const ident = identidadeEfetiva(socket, data);
+        if (!ident || !socket.rooms.has(`grupo_${grupo_id}`)) return;
         socket.to(`grupo_${grupo_id}`).emit('user_stop_typing_group', {
             grupo_id,
-            usuario_id
+            usuario_id: ident.usuarioId
         });
     });
 
@@ -1733,21 +1972,30 @@ io.on('connection', (socket) => {
     // EVENTOS HERDADOS (compatibilidade)
     // ========================================
 
-    socket.on('join_empresa', (empresa) => {
-        socket.join(`empresa_${empresa}`);
-        console.log(`[SOCKET] Usuário entrou na empresa ${empresa}`);
+    // O argumento enviado pelo cliente é ignorado: só se entra na empresa/setor do próprio usuário autenticado.
+    socket.on('join_empresa', () => {
+        const ident = identidadeDoSocket(socket);
+        if (!ident?.empresaId) return;
+        socket.join(`empresa_${ident.empresaId}`);
     });
 
-    socket.on('join_setor', (setor) => {
-        socket.join(`setor_${setor}`);
-        console.log(`[SOCKET] Usuário entrou no setor ${setor}`);
+    socket.on('join_setor', () => {
+        const ident = identidadeDoSocket(socket);
+        const setorId = normalizarIdSocket(ident?.user?.setor_id);
+        if (!ident?.empresaId || !setorId) return;
+        socket.join(`setor_${setorId}`);
     });
 
     socket.on('setor_message', async (data) => {
         try {
-            io.to(`setor_${data.setor_id}`).emit('receive_setor', {
+            const ident = identidadeDoSocket(socket);
+            const setorId = normalizarIdSocket(ident?.user?.setor_id);
+            if (!ident || !setorId) return;
+            io.to(`setor_${setorId}`).emit('receive_setor', {
                 ...data,
-                nome: data.nome
+                setor_id: setorId,
+                usuario_id: ident.usuarioId,
+                nome: ident.user.nome
             });
         } catch (err) {
             console.error('Erro ao enviar mensagem de setor:', err);
@@ -1756,7 +2004,13 @@ io.on('connection', (socket) => {
 
     socket.on('empresa_message', async (data) => {
         try {
-            io.to(`empresa_${data.empresa_id}`).emit('receive_empresa', data);
+            const ident = identidadeDoSocket(socket);
+            if (!ident?.empresaId) return;
+            io.to(`empresa_${ident.empresaId}`).emit('receive_empresa', {
+                ...data,
+                empresa_id: ident.empresaId,
+                usuario_id: ident.usuarioId,
+            });
         } catch (err) {
             console.error('Erro ao enviar mensagem de empresa:', err);
         }

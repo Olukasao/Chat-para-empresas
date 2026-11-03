@@ -56,7 +56,7 @@ const authMiddleware = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, getSecret());
+    const decoded = jwt.verify(token, getSecret(), { algorithms: ["HS256"] });
     const usuario = await buscarUsuario(decoded.id);
 
     if (!usuario) {

@@ -38,3 +38,16 @@ test("resume totais e situação de cada técnico sem expor dados do cliente", (
     assert.ok(!json.includes("CLIENTE SIGILOSO"));
     assert.ok(!json.includes("RUA X"));
 });
+
+test("recados do dia: só blocos Outro com descrição, em ordem de horário", async () => {
+    const { observacoesDoDia } = await import("./agendaTecnicosResumoService.js");
+    const r = observacoesDoDia([
+        { tipo: "almoco", tecnicoId: "Rafael", horaInicio: "12:45", descricao: null },
+        { tipo: "outro", tecnicoId: "Alex", horaInicio: "08:30", descricao: "Em dupla com Alan.", finalizado: false },
+        { tipo: "outro", tecnicoId: "Alan", horaInicio: "08:15", descricao: "LEONARDO SILVA ALAN IRA ATUAR ENTRE 08 E 16:48 H", finalizado: true },
+        { tipo: "outro", tecnicoId: "Nelson", horaInicio: "09:00", descricao: "   " },
+    ]);
+    assert.deepEqual(r.map((x) => x.tecnico), ["Alan", "Alex"]);
+    assert.equal(r[0].finalizado, true);
+    assert.equal(r[0].hora, "08:15");
+});

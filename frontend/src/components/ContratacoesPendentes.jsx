@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { socket } from '../services/socket';
 import '../styles/ContratacoesPendentes.css';
@@ -12,6 +12,30 @@ import '../styles/ContratacoesPendentes.css';
 const ADMIN_CONTRATACOES_URL = 'https://acessanet.com.br/admin/contratacoes';
 const TOAST_MS = 12000;
 const ROTAS_SEM_AVISO = ['/login', '/atendimento-sso'];
+
+// Bolha arrastável: a posição (canto superior esquerdo da bolha) fica salva no
+// navegador. O padrão fica acima da área de envio do chat.
+const POSICAO_KEY = 'contratacoes:posicao';
+const BOLHA = 52;
+const MARGEM = 12;
+const LIMIAR_ARRASTE = 5;
+
+const limitar = ({ x, y }) => ({
+  x: Math.min(Math.max(MARGEM, x), window.innerWidth - BOLHA - MARGEM),
+  y: Math.min(Math.max(MARGEM, y), window.innerHeight - BOLHA - MARGEM),
+});
+
+const posicaoPadrao = () => limitar({ x: window.innerWidth - BOLHA - 20, y: window.innerHeight - BOLHA - 110 });
+
+const lerPosicao = () => {
+  try {
+    const salva = JSON.parse(localStorage.getItem(POSICAO_KEY));
+    if (Number.isFinite(salva?.x) && Number.isFinite(salva?.y)) return limitar(salva);
+  } catch {
+    // Posição salva inválida: usa a padrão.
+  }
+  return posicaoPadrao();
+};
 
 const formatarHora = (iso) => {
   const data = new Date(iso);
@@ -28,6 +52,79 @@ export default function ContratacoesPendentes() {
   const [avisos, setAvisos] = useState([]);
   const [chamando, setChamando] = useState(false);
   const timers = useRef([]);
+  const [posicao, setPosicao] = useState(lerPosicao);
+  const [arrastando, setArrastando] = useState(false);
+  const arraste = useRef(null);
+  const ignorarClique = useRef(false);
+
+  const salvarPosicao = useCallback((nova) => {
+    const ajustada = limitar(nova);
+    setPosicao(ajustada);
+    try {
+      localStorage.setItem(POSICAO_KEY, JSON.stringify(ajustada));
+    } catch {
+      // Sem armazenamento: a posição vale só nesta sessão.
+    }
+  }, []);
+
+  useEffect(() => {
+    const aoRedimensionar = () => setPosicao((atual) => limitar(atual));
+    window.addEventListener('resize', aoRedimensionar);
+    return () => window.removeEventListener('resize', aoRedimensionar);
+  }, []);
+
+  const iniciarArraste = (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+    arraste.current = {
+      id: event.pointerId,
+      inicioX: event.clientX,
+      inicioY: event.clientY,
+      origem: posicao,
+      moveu: false,
+    };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const moverArraste = (event) => {
+    const atual = arraste.current;
+    if (!atual || atual.id !== event.pointerId) return;
+    const dx = event.clientX - atual.inicioX;
+    const dy = event.clientY - atual.inicioY;
+    if (!atual.moveu && Math.hypot(dx, dy) < LIMIAR_ARRASTE) return;
+    if (!atual.moveu) {
+      atual.moveu = true;
+      setArrastando(true);
+    }
+    setPosicao(limitar({ x: atual.origem.x + dx, y: atual.origem.y + dy }));
+  };
+
+  const terminarArraste = (event) => {
+    const atual = arraste.current;
+    if (!atual || atual.id !== event.pointerId) return;
+    arraste.current = null;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (atual.moveu) {
+      ignorarClique.current = true;
+      setArrastando(false);
+      salvarPosicao({ x: atual.origem.x + event.clientX - atual.inicioX, y: atual.origem.y + event.clientY - atual.inicioY });
+    }
+  };
+
+  // Shift + setas move a bolha pelo teclado; Shift + Home volta à posição padrão.
+  const moverPeloTeclado = (event) => {
+    if (!event.shiftKey) return;
+    const passo = 24;
+    const deslocamentos = { ArrowUp: [0, -passo], ArrowDown: [0, passo], ArrowLeft: [-passo, 0], ArrowRight: [passo, 0] };
+    if (event.key === 'Home') {
+      event.preventDefault();
+      salvarPosicao(posicaoPadrao());
+      return;
+    }
+    const delta = deslocamentos[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    salvarPosicao({ x: posicao.x + delta[0], y: posicao.y + delta[1] });
+  };
 
   const logado = Boolean(localStorage.getItem('token')) && !ROTAS_SEM_AVISO.includes(pathname);
 
@@ -82,8 +179,26 @@ export default function ContratacoesPendentes() {
   const { pendentes, itens, conectado } = resumo;
   const temPendencia = pendentes > 0;
 
+  // O painel e os avisos abrem para o lado com mais espaço livre.
+  const metadeSuperior = posicao.y + BOLHA / 2 < window.innerHeight / 2;
+  const ladoEsquerdo = posicao.x + BOLHA / 2 < window.innerWidth / 2;
+  const estiloWidget = {
+    ...(metadeSuperior
+      ? { top: posicao.y }
+      : { bottom: window.innerHeight - posicao.y - BOLHA }),
+    ...(ladoEsquerdo
+      ? { left: posicao.x }
+      : { right: window.innerWidth - posicao.x - BOLHA }),
+  };
+  const classesWidget = [
+    'contratacoes-widget',
+    metadeSuperior ? 'abre-abaixo' : '',
+    ladoEsquerdo ? 'alinha-esquerda' : '',
+    arrastando ? 'is-dragging' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className="contratacoes-widget">
+    <div className={classesWidget} style={estiloWidget}>
       {avisos.length > 0 && (
         <div className="contratacoes-toasts" role="status" aria-live="polite">
           {avisos.map((aviso) => (
@@ -134,9 +249,21 @@ export default function ContratacoesPendentes() {
       <button
         type="button"
         className={`contratacoes-bubble${temPendencia ? ' is-pending' : ''}${chamando ? ' is-ringing' : ''}${conectado ? '' : ' is-offline'}`}
-        onClick={() => setAberto((atual) => !atual)}
+        onClick={() => {
+          if (ignorarClique.current) {
+            ignorarClique.current = false;
+            return;
+          }
+          setAberto((atual) => !atual);
+        }}
+        onPointerDown={iniciarArraste}
+        onPointerMove={moverArraste}
+        onPointerUp={terminarArraste}
+        onPointerCancel={terminarArraste}
+        onKeyDown={moverPeloTeclado}
         aria-label={temPendencia ? `${pendentes} contratações pendentes no site` : 'Nenhuma contratação pendente'}
-        title="Contratações pendentes do site"
+        aria-describedby="contratacoes-dica-arraste"
+        title="Contratações pendentes do site — arraste para mover"
       >
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
@@ -145,6 +272,9 @@ export default function ContratacoesPendentes() {
         </svg>
         <span className="contratacoes-count">{pendentes > 99 ? '99+' : pendentes}</span>
       </button>
+      <span id="contratacoes-dica-arraste" className="contratacoes-sr-only">
+        Arraste para mover. Pelo teclado, use Shift e as setas; Shift e Home voltam à posição inicial.
+      </span>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import dns from "dns/promises";
+import os from "node:os";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import net from "net";
@@ -13,11 +14,26 @@ import multer from "multer";
 import sharp from "sharp";
 import db from "../db/db.js";
 import authMiddleware from "../middlewares/middleware.js";
+import { registerDashboardRelayRoute } from "../services/dashboardRelayService.js";
+import { maximoDeDias, montarPayloadRenovado, podeRenovar } from "../services/sessaoRenovacaoService.js";
+import { dispositivosOnline, listarWorkspace } from "../services/workspacePresenceService.js";
+import {
+    gravarSinal, lerSinal, lerVersaoPublicada, listarDispositivos, removerDispositivo, situacaoDaVersao,
+} from "../services/workspaceDispositivosService.js";
 import { AGENDA_SESSION_COOKIE, definirSessaoAgenda, validarSessaoAgenda } from "../services/agendaSessionService.js";
 import { obterResumoAgendaTecnicos } from "../services/agendaTecnicosResumoService.js";
 import purchaseModuleRoutes, { userHasPurchasePermission } from "./purchaseModule.js";
 import networkDiagnosticsRoutes from "./networkDiagnosticsRoutes.js";
+import oltRoutes from "./oltRoutes.js";
 import rouletteRoutes from "./rouletteRoutes.js";
+import cursosRoutes from "./cursosRoutes.js";
+import lembretesRoutes from "./lembretesRoutes.js";
+import marketingRoutes from "./marketingRoutes.js";
+import iaResumoRoutes from "./iaResumoRoutes.js";
+import assistenteRoutes from "./assistenteRoutes.js";
+import phoneRoutes, { criarPhoneAdminRoutes } from "./phoneRoutes.js";
+import criarIaAdminRoutes from "./iaAdminRoutes.js";
+import chamadosRoutes from "./chamadosRoutes.js";
 import { userHasNetworkDiagnosticPermission } from "../services/networkDiagnosticPermissionsService.js";
 import {
     AUDIT_LEVELS,
@@ -28,6 +44,8 @@ import {
     registrarAuditoria,
 } from "../services/auditService.js";
 import { getJwtSecret } from "../config/authSecrets.js";
+import { criarLimitadorLogin } from "../security/loginRateLimit.js";
+import { lerExtensoesPermitidas, validarArquivoChat } from "../security/uploadSecurity.js";
 import {
     CUSTOM_SOUNDS_ROOT,
     SOUND_EFFECT_UPLOAD_MAX_SIZE_BYTES,
@@ -41,6 +59,8 @@ import {
 } from "../services/soundEffectsService.js";
 import {
     definirPermissaoUsoEfeitosSonoros,
+    definirSemLimiteDeTempoEfeitosSonoros,
+    definirVolumeMaximoEfeitosSonoros,
     listarPermissoesEfeitosSonoros,
     listarUsuariosAlvoEfeitosSonoros,
     obterNomeGrupoAlvoEfeitosSonoros,
@@ -50,6 +70,7 @@ import {
 } from "../services/soundEffectPermissionsService.js";
 
 const route = Router();
+registerDashboardRelayRoute(route, authMiddleware);
 
 route.post("/integrations/agenda/session", authMiddleware, (req, res) => {
     const sessaoToken = definirSessaoAgenda(req, res);
@@ -66,7 +87,7 @@ route.post("/integrations/agenda/session/verify", async (req, res) => {
     const sessao = validarSessaoAgenda(String(req.headers.authorization || "").replace(/^Bearer /, ""));
     if (!sessao) return res.status(401).json({ erro: "Sessão do chat expirada ou inválida." });
     try {
-        const [rows] = await db.query("SELECT id, nome FROM usuarios WHERE id = ? AND deletado_em IS NULL LIMIT 1", [sessao.id]);
+        const [rows] = await db.query("SELECT id, nome, perfil FROM usuarios WHERE id = ? AND deletado_em IS NULL LIMIT 1", [sessao.id]);
         if (!rows.length) return res.status(401).json({ erro: "Usuário do chat não encontrado." });
         res.json({ usuario: rows[0], sessaoId: sessao.sid, exp: sessao.exp });
     } catch {
@@ -577,11 +598,22 @@ const chatUploadStorage = multer.diskStorage({
     },
 });
 
+const CHAT_UPLOAD_EXTENSOES_PERMITIDAS = lerExtensoesPermitidas();
+
 const chatUpload = multer({
     storage: chatUploadStorage,
     limits: {
         fileSize: MAX_UPLOAD_SIZE_BYTES,
         files: 1,
+    },
+    // Allowlist de extensão + bloqueio de MIME ativo (html/svg/js). Ver src/security/uploadSecurity.js.
+    fileFilter: (_req, file, callback) => {
+        const motivo = validarArquivoChat(file, CHAT_UPLOAD_EXTENSOES_PERMITIDAS);
+        if (motivo) {
+            callback(Object.assign(new Error(motivo), { codigoUpload: "TIPO_NAO_PERMITIDO" }));
+            return;
+        }
+        callback(null, true);
     },
 });
 
@@ -591,6 +623,10 @@ const uploadChatMiddleware = (req, res, next) => {
             return res.status(413).json({
                 error: `Arquivo muito grande. Envie arquivos de até ${MAX_UPLOAD_SIZE_MB} MB`,
             });
+        }
+
+        if (err?.codigoUpload === "TIPO_NAO_PERMITIDO") {
+            return res.status(415).json({ error: err.message });
         }
 
         if (err) {
@@ -1545,6 +1581,30 @@ const QUICK_ACCESS_ITEMS = [
         sort_order: 10,
     },
     {
+        id: "precadastro",
+        label: "Pré-cadastro",
+        subtitle: "Pessoa física ou pessoa jurídica, no SGP",
+        icon: "PC",
+        type: "menu",
+        sort_order: 12,
+        children: [
+            {
+                id: "precadastro-pf",
+                label: "Pessoa física",
+                icon: "F",
+                type: "external",
+                target: "https://acessanet.sgp.net.br/public/precadastro/F/",
+            },
+            {
+                id: "precadastro-pj",
+                label: "Pessoa jurídica",
+                icon: "J",
+                type: "external",
+                target: "https://acessanet.sgp.net.br/public/precadastro/J/",
+            },
+        ],
+    },
+    {
         id: "olt-cloud",
         label: "OLT Cloud",
         icon: "☁",
@@ -1815,7 +1875,7 @@ const QUICK_ACCESS_ITEMS = [
     },
     {
         id: "microsip",
-        label: "MicroSIP",
+        label: "Telefone",
         icon: "☎",
         type: "protocol",
         target: "tel:",
@@ -8336,21 +8396,64 @@ const requireEditorAvisosInternos = async (req, res, next) => {
     }
 };
 
-route.post("/setores/:empresa_id", async (req, res) => {
-    const { empresa_id } = req.params;
+// Exige login e ignora o parâmetro da URL: cada usuário só lista setores da própria empresa (antes era público
+// e permitia enumerar qualquer empresa). Nenhuma tela de login depende desta rota (só Chat.jsx, já logado).
+route.post("/setores/:empresa_id", authMiddleware, async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            "SELECT * FROM setores WHERE empresa_id=?",
+            [req.user.empresa_id]
+        );
 
-    const [rows] = await db.query(
-        "SELECT * FROM setores WHERE empresa_id=?",
-        [empresa_id]
-    );
-
-    res.json(rows);
+        res.json(rows);
+    } catch (err) {
+        console.error("Erro ao listar setores:", err);
+        res.status(500).json({ error: "Erro ao listar setores" });
+    }
 });
 
-route.post("/login", async (req, res) => {
-    const { email, senha } = req.body;
+// Troca o token ainda válido por um novo (renovação silenciosa feita pelo app). O limite absoluto da sessão vale aqui.
+route.post("/auth/renovar", authMiddleware, (req, res) => {
+    try {
+        if (!podeRenovar(req.user, Math.floor(Date.now() / 1000), maximoDeDias())) {
+            return res.status(401).json({ error: "A sessão chegou ao limite de duração. Entre novamente." });
+        }
 
-    const [rows] = await db.query(`
+        const payload = montarPayloadRenovado(req.user, req.user);
+        const token = jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN });
+        const { exp } = jwt.decode(token);
+        res.set("Cache-Control", "no-store").json({ token, exp });
+    } catch (err) {
+        console.error("Erro ao renovar a sessão:", err);
+        res.status(500).json({ error: "Não foi possível renovar a sessão." });
+    }
+});
+
+// Limite de tentativas por IP e por e-mail (em memória, com backoff). Ver src/security/loginRateLimit.js.
+const limitadorLogin = criarLimitadorLogin();
+const HASH_FALSO_LOGIN = bcrypt.hashSync("senha-inexistente-para-igualar-tempo", 10);
+const MENSAGEM_CREDENCIAIS_INVALIDAS = "Credenciais inválidas";
+
+route.post("/login", async (req, res) => {
+    try {
+        const emailInformado = typeof req.body?.email === "string" ? req.body.email.trim() : "";
+        const senha = typeof req.body?.senha === "string" ? req.body.senha : "";
+        const chaveLimite = { ip: req.ip, email: emailInformado };
+
+        const limite = limitadorLogin.verificar(chaveLimite);
+        if (!limite.permitido) {
+            res.set("Retry-After", String(limite.tentarEmSeg));
+            return res.status(429).json({
+                error: `Muitas tentativas de login. Tente novamente em ${Math.max(1, Math.ceil(limite.tentarEmSeg / 60))} min.`,
+            });
+        }
+
+        if (!emailInformado || !senha || emailInformado.length > 254 || senha.length > 1024) {
+            limitadorLogin.registrarFalha(chaveLimite);
+            return res.status(401).json({ error: MENSAGEM_CREDENCIAIS_INVALIDAS });
+        }
+
+        const [rows] = await db.query(`
     SELECT 
       u.*,
       e.nome AS empresa_nome,
@@ -8359,83 +8462,131 @@ route.post("/login", async (req, res) => {
     JOIN empresas e ON u.empresa_id = e.id
     LEFT JOIN setores s ON u.setor_id = s.id
     WHERE u.email = ? AND u.deletado_em IS NULL
-  `, [email]);
+  `, [emailInformado]);
 
-    const user = rows[0];
+        const user = rows[0];
 
-    if (!user) {
-        return res.status(401).json({ error: "Usuário não encontrado" });
+        // Sempre roda o bcrypt (hash falso se o usuário não existe): mesma mensagem e mesmo tempo, sem enumeração de e-mails.
+        const valid = await bcrypt.compare(senha, user?.senha || HASH_FALSO_LOGIN);
+
+        if (!user || !valid) {
+            limitadorLogin.registrarFalha(chaveLimite);
+            return res.status(401).json({ error: MENSAGEM_CREDENCIAIS_INVALIDAS });
+        }
+
+        limitadorLogin.registrarSucesso(chaveLimite);
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+                nome: user.nome,
+                empresa_id: user.empresa_id,
+                setor_id: user.setor_id,
+                perfil: user.perfil,
+            },
+            getSecret(),
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                nome: user.nome,
+                email: user.email,
+                empresa_id: user.empresa_id,
+                empresa_nome: user.empresa_nome,
+                setor_id: user.setor_id,
+                setor_nome: user.setor_nome,
+                avatar: user.avatar,
+                perfil: user.perfil,
+            },
+        });
+    } catch (err) {
+        console.error("Erro no login:", err);
+        res.status(500).json({ error: "Erro ao entrar. Tente novamente." });
     }
-
-    const valid = await bcrypt.compare(senha, user.senha);
-
-    if (!valid) {
-        return res.status(401).json({ error: "Senha inválida" });
-    }
-
-    const token = jwt.sign(
-        {
-            id: user.id,
-            nome: user.nome,
-            empresa_id: user.empresa_id,
-            setor_id: user.setor_id,
-            perfil: user.perfil,
-        },
-        getSecret(),
-        { expiresIn: JWT_EXPIRES_IN }
-    );
-
-    res.json({
-        token,
-        user: {
-            id: user.id,
-            nome: user.nome,
-            email: user.email,
-            empresa_id: user.empresa_id,
-            empresa_nome: user.empresa_nome,
-            setor_id: user.setor_id,
-            setor_nome: user.setor_nome,
-            avatar: user.avatar,
-            perfil: user.perfil,
-        },
-    });
 });
 
-route.post("/usuarios/:empresa_id", async (req, res) => {
-    const { empresa_id } = req.params;
+// Exige login e ignora o parâmetro da URL (ver /setores/:empresa_id).
+route.post("/usuarios/:empresa_id", authMiddleware, async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            "SELECT id, nome FROM usuarios WHERE empresa_id=? AND deletado_em IS NULL",
+            [req.user.empresa_id]
+        );
 
-    const [rows] = await db.query(
-        "SELECT id, nome FROM usuarios WHERE empresa_id=? AND deletado_em IS NULL",
-        [empresa_id]
-    );
-
-    res.json(rows);
+        res.json(rows);
+    } catch (err) {
+        console.error("Erro ao listar usuários:", err);
+        res.status(500).json({ error: "Erro ao listar usuários" });
+    }
 });
 
 
-// REGISTER
-route.post("/register", async (req, res) => {
-    const { nome, email, senha, empresa_id, setor_id } = req.body;
+// REGISTER: só administrador autenticado cria usuário (a tela do Admin usa POST /admin/usuarios; esta rota
+// ficou por compatibilidade). A empresa é sempre a do administrador; o empresa_id do corpo é ignorado.
+route.post("/register", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+        const nome = typeof req.body?.nome === "string" ? req.body.nome.trim() : "";
+        const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+        const senha = typeof req.body?.senha === "string" ? req.body.senha : "";
+        const setorId = Number(req.body?.setor_id);
+        const empresaId = req.admin.empresa_id;
 
-    const [setor] = await db.query(
-        "SELECT * FROM setores WHERE id=? AND empresa_id=?",
-        [setor_id, empresa_id]
-    );
+        if (!nome || nome.length > 150) {
+            return res.status(400).json({ error: "Nome inválido" });
+        }
 
-    if (setor.length === 0) {
-        return res
-            .status(400)
-            .json({ error: "Setor inválido para essa empresa" });
+        if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: "E-mail inválido" });
+        }
+
+        if (senha.length < 6 || senha.length > 128) {
+            return res.status(400).json({ error: "A senha precisa ter entre 6 e 128 caracteres" });
+        }
+
+        if (!Number.isInteger(setorId) || setorId <= 0) {
+            return res.status(400).json({ error: "Setor inválido para essa empresa" });
+        }
+
+        const [setor] = await db.query(
+            "SELECT id FROM setores WHERE id=? AND empresa_id=?",
+            [setorId, empresaId]
+        );
+
+        if (setor.length === 0) {
+            return res
+                .status(400)
+                .json({ error: "Setor inválido para essa empresa" });
+        }
+
+        // Inclui usuários removidos: o e-mail é único na tabela e reativação é feita por POST /admin/usuarios.
+        const [existente] = await db.query("SELECT id FROM usuarios WHERE email=? LIMIT 1", [email]);
+
+        if (existente.length) {
+            return res.status(409).json({ error: "Já existe um usuário com esse e-mail" });
+        }
+
+        const hash = await bcrypt.hash(senha, 10);
+
+        try {
+            await db.query(
+                "INSERT INTO usuarios (nome,email,senha,empresa_id,setor_id) VALUES (?,?,?,?,?)",
+                [nome, email, hash, empresaId, setorId]
+            );
+        } catch (err) {
+            if (err?.code === "ER_DUP_ENTRY") {
+                return res.status(409).json({ error: "Já existe um usuário com esse e-mail" });
+            }
+            throw err;
+        }
+
+        res.status(201).json({ success: true });
+    } catch (err) {
+        console.error("Erro ao registrar usuário:", err);
+        res.status(500).json({ error: "Erro ao registrar usuário" });
     }
-
-    const hash = await bcrypt.hash(senha, 10);
-
-    await db.query(
-        "INSERT INTO usuarios (nome,email,senha,empresa_id,setor_id) VALUES (?,?,?,?,?)",
-        [nome, email, hash, empresa_id, setor_id]
-    );
-
-    res.json({ success: true });
 });
 
 // USER LOGADO
@@ -8475,6 +8626,7 @@ route.put("/profile", authMiddleware, async (req, res) => {
         const {
             nome,
             avatar,
+            email,
             senha_atual,
             nova_senha,
         } = req.body;
@@ -8533,6 +8685,48 @@ route.put("/profile", authMiddleware, async (req, res) => {
             values.push(hash);
         }
 
+        if (email !== undefined) {
+            // O e-mail é o login: a troca exige a senha atual e não pode repetir o de outro usuário.
+            const novoEmail = String(email || "").trim().toLowerCase();
+
+            if (novoEmail.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(novoEmail)) {
+                return res.status(400).json({ error: "Informe um e-mail válido" });
+            }
+
+            const [atuais] = await db.query(`
+                SELECT email, senha
+                FROM usuarios
+                WHERE id = ? AND deletado_em IS NULL
+                LIMIT 1
+            `, [userId]);
+
+            const atual = atuais[0];
+
+            if (!atual) {
+                return res.status(404).json({ error: "Usuário não encontrado" });
+            }
+
+            if (novoEmail !== String(atual.email || "").trim().toLowerCase()) {
+                const senhaConfere = await bcrypt.compare(senha_atual || "", atual.senha);
+
+                if (!senhaConfere) {
+                    return res.status(401).json({ error: "Senha atual inválida" });
+                }
+
+                const [emUso] = await db.query(
+                    "SELECT id FROM usuarios WHERE email = ? AND id <> ? LIMIT 1",
+                    [novoEmail, userId]
+                );
+
+                if (emUso.length) {
+                    return res.status(409).json({ error: "Este e-mail já está em uso por outro usuário" });
+                }
+
+                fields.push("email = ?");
+                values.push(novoEmail);
+            }
+        }
+
         if (!fields.length) {
             return res.status(400).json({ error: "Nada para atualizar" });
         }
@@ -8570,6 +8764,10 @@ route.put("/profile", authMiddleware, async (req, res) => {
 
         res.json(usuarioComGrupos);
     } catch (err) {
+        if (err?.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({ error: "Este e-mail já está em uso por outro usuário" });
+        }
+
         console.error("Erro ao atualizar perfil:", err);
         res.status(500).json({ error: "Erro ao atualizar perfil" });
     }
@@ -14659,6 +14857,37 @@ route.put("/plantao-domingo", authMiddleware, requireAdmin, async (req, res) => 
     }
 });
 
+// Mesma atualização global, mas só aceita pedidos feitos pelo próprio servidor (sem login): serve para o TI
+// forçar o F5 das telas abertas depois de uma publicação. O endereço de origem de uma conexão TCP não se falsifica.
+const enderecosDoServidor = () => new Set(Object.values(os.networkInterfaces()).flat().filter(Boolean).map((i) => i.address));
+// Além do endereço, exige o segredo do header X-Local-Secret (env LOCAL_FORCE_REFRESH_SECRET). Sem o segredo
+// configurado na env a rota fica desligada (503): qualquer processo da máquina podia chamá-la antes.
+const segredoLocalConfere = (recebido) => {
+    const esperado = String(process.env.LOCAL_FORCE_REFRESH_SECRET || "");
+    if (esperado.length < 16) return null;
+    const a = crypto.createHash("sha256").update(String(recebido || "")).digest();
+    const b = crypto.createHash("sha256").update(esperado).digest();
+    return crypto.timingSafeEqual(a, b);
+};
+route.post("/local/force-refresh-chat", async (req, res) => {
+    const origem = String(req.socket?.remoteAddress || "").replace(/^::ffff:/, "");
+    if (!enderecosDoServidor().has(origem) || req.headers["x-forwarded-for"]) {
+        return res.status(403).json({ error: "Comando disponível apenas no próprio servidor." });
+    }
+    const confere = segredoLocalConfere(req.headers["x-local-secret"]);
+    if (confere === null) {
+        return res.status(503).json({ error: "Comando desligado: defina LOCAL_FORCE_REFRESH_SECRET (mín. 16 caracteres) no servidor." });
+    }
+    if (!confere) {
+        return res.status(403).json({ error: "Segredo inválido." });
+    }
+    const io = req.app.get("io");
+    const payload = { reason: limitarTexto(req.body?.reason || "Atualizacao solicitada pelo servidor", 180), requested_by: "servidor", requested_at: new Date().toISOString() };
+    io.emit("chat:force-refresh", payload);
+    io.emit("system:force-refresh", payload);
+    res.json({ success: true, sockets: io.engine?.clientsCount || 0, ...payload });
+});
+
 route.post("/admin/force-refresh-chat", authMiddleware, requireAdmin, async (req, res) => {
     try {
         const io = req.app.get("io");
@@ -15568,6 +15797,40 @@ route.put("/sound-effects/permissions/:userId", authMiddleware, requireSoundEffe
     }
 });
 
+route.put("/sound-effects/permissions/:userId/max-volume", authMiddleware, requireSoundEffectManager, async (req, res) => {
+    try {
+        await definirVolumeMaximoEfeitosSonoros({
+            usuario: req.soundEffectUser || req.user,
+            targetUserId: req.params.userId,
+            percent: req.body?.percent,
+        });
+
+        res.json({
+            users: await listarPermissoesEfeitosSonoros(req.soundEffectUser || req.user),
+        });
+    } catch (err) {
+        console.error("Erro ao salvar volume máximo de efeitos sonoros:", err);
+        res.status(err.status || 500).json({ error: err.message || "Erro ao salvar o volume máximo." });
+    }
+});
+
+route.put("/sound-effects/permissions/:userId/no-time-limit", authMiddleware, requireSoundEffectManager, async (req, res) => {
+    try {
+        await definirSemLimiteDeTempoEfeitosSonoros({
+            usuario: req.soundEffectUser || req.user,
+            targetUserId: req.params.userId,
+            enabled: Boolean(req.body?.enabled),
+        });
+
+        res.json({
+            users: await listarPermissoesEfeitosSonoros(req.soundEffectUser || req.user),
+        });
+    } catch (err) {
+        console.error("Erro ao salvar o limite de tempo dos efeitos sonoros:", err);
+        res.status(err.status || 500).json({ error: err.message || "Erro ao salvar o limite de tempo." });
+    }
+});
+
 // ========================================
 // ADMIN - ENDPOINTS
 // ========================================
@@ -16249,6 +16512,91 @@ const registrarAuditoriaAdminUsuario = async (req, dados = {}) => {
         console.error("Erro ao registrar auditoria administrativa de usuario:", auditErr);
     }
 };
+
+// Computadores que usam o Workspace: quem, de onde, em qual versão e quando foi visto. Compara com a versão publicada.
+route.get("/admin/workspace/dispositivos", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+        const empresaId = req.admin.empresa_id;
+        const publicada = lerVersaoPublicada();
+        const online = dispositivosOnline(empresaId);
+        const linhas = await listarDispositivos(empresaId);
+        const dispositivos = linhas.map((d) => ({
+            id: d.id,
+            computador: d.computador || "(sem nome)",
+            ip: d.ip,
+            usuario: { id: d.usuario_id, nome: d.usuario_nome, email: d.usuario_email, setor: d.setor_nome || null },
+            versao: d.versao,
+            situacao: situacaoDaVersao(d.versao, publicada),
+            online: online.has(`${d.usuario_id}:${String(d.dispositivo).toLowerCase()}`),
+            primeiro_visto: d.primeiro_visto,
+            ultimo_visto: d.ultimo_visto,
+        }));
+        res.set("Cache-Control", "no-store").json({ publicada, sinal: lerSinal(), dispositivos });
+    } catch (err) {
+        console.error("Erro ao listar computadores do Workspace:", err);
+        res.status(500).json({ error: "Não foi possível listar os computadores." });
+    }
+});
+
+// Manda os computadores atualizarem para a versão publicada: em silêncio (padrão) ou com aviso na tela.
+route.post("/admin/workspace/forcar-atualizacao", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+        const sinal = gravarSinal({ obrigatoria: req.body?.obrigatoria === true, mensagem: req.body?.mensagem });
+        console.log(`[WORKSPACE] ${req.admin.nome} forçou a atualização para ${sinal.versao}${sinal.obrigatoria ? " (com aviso)" : " (silenciosa)"}.`);
+        res.json({ sinal });
+    } catch (err) {
+        console.error("Erro ao forçar a atualização do Workspace:", err);
+        res.status(err.status || 500).json({ error: err.message || "Não foi possível forçar a atualização." });
+    }
+});
+
+route.delete("/admin/workspace/dispositivos/:id", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+        await removerDispositivo(req.admin.empresa_id, req.params.id);
+        res.json({ ok: true });
+    } catch (err) {
+        console.error("Erro ao remover computador do Workspace:", err);
+        res.status(500).json({ error: "Não foi possível remover o computador." });
+    }
+});
+
+// Quem está com o aplicativo Acessa Workspace aberto agora (lista em memória, alimentada pelo socket).
+route.get("/admin/workspace/online", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+        const empresaId = req.admin.empresa_id;
+        const online = listarWorkspace(empresaId);
+        if (!online.length) return res.json([]);
+
+        const [usuarios] = await db.query(`
+            SELECT u.id, u.nome, u.email, u.avatar, u.perfil, s.nome AS setor_nome
+            FROM usuarios u
+            LEFT JOIN setores s ON s.id = u.setor_id
+            WHERE u.empresa_id = ? AND u.deletado_em IS NULL AND u.id IN (?)
+        `, [empresaId, online.map((o) => o.usuario_id)]);
+        const porId = new Map(usuarios.map((u) => [Number(u.id), u]));
+
+        res.json(online
+            .filter((o) => porId.has(o.usuario_id))
+            .map((o) => {
+                const u = porId.get(o.usuario_id);
+                return {
+                    id: o.usuario_id,
+                    nome: u.nome,
+                    email: u.email,
+                    avatar: u.avatar,
+                    perfil: u.perfil,
+                    setor_nome: u.setor_nome,
+                    versao: o.versoes[0] || null,
+                    desde: o.desde,
+                    janelas: o.janelas,
+                };
+            })
+            .sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR")));
+    } catch (err) {
+        console.error("Erro ao listar quem usa o Workspace:", err);
+        res.status(500).json({ error: "Erro ao listar quem está usando o aplicativo" });
+    }
+});
 
 route.get("/admin/usuarios", authMiddleware, requireAdmin, async (req, res) => {
     try {
@@ -17630,7 +17978,18 @@ route.get("/controle-operacional/tecnico/:id", authMiddleware, requireAdmin, req
     })
 ));
 
+// Antes das rotas que aplicam autenticação a tudo (a verificação de certificado é pública).
+route.use("/cursos", cursosRoutes);
+route.use("/marketing", marketingRoutes);
+route.use("/ia/assistente", assistenteRoutes);
+route.use("/lembretes", lembretesRoutes);
+route.use("/phone", phoneRoutes);
+route.use("/admin/phone", authMiddleware, criarPhoneAdminRoutes({ requireAdmin }));
+route.use("/admin/ia", authMiddleware, criarIaAdminRoutes({ requireAdmin }));
+route.use("/ia", iaResumoRoutes);
+route.use("/chamados", chamadosRoutes);
 route.use(networkDiagnosticsRoutes);
+route.use(oltRoutes);
 route.use(purchaseModuleRoutes);
 route.use("/roulette", rouletteRoutes);
 

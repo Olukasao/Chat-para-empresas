@@ -1,3 +1,4 @@
+import https from "node:https";
 import { io as conectarSocket } from "socket.io-client";
 
 // Situação atual da Agenda de Técnicos (app separado, porta 8500) para o card
@@ -29,6 +30,40 @@ function resumirOrdem(ordem) {
         motivo: texto(ordem.motivo),
         bairro: texto(ordem.bairro),
     };
+}
+
+/**
+ * Blocos "Outro" da agenda (tipo "outro" com descrição), como "Alan irá atuar entre 08 e 16:48": recados da
+ * coordenação sobre o dia de um técnico. Os blocos de almoço e os sem descrição ficam de fora.
+ */
+export function observacoesDoDia(blocos = []) {
+    return (Array.isArray(blocos) ? blocos : [])
+        .filter((b) => b?.tipo === "outro" && texto(b.descricao, 400))
+        .map((b) => ({
+            tecnico: texto(b.tecnicoId ?? b.tecnico_id, 40),
+            hora: horaCurta(b.horaInicio ?? b.hora_inicio),
+            descricao: texto(b.descricao, 220),
+            finalizado: Boolean(b.finalizado),
+        }))
+        .sort((a, b) => a.hora.localeCompare(b.hora) || a.tecnico.localeCompare(b.tecnico, "pt-BR"))
+        .slice(0, 30);
+}
+
+/** Lê os bloqueios do dia direto da agenda (certificado próprio; a conexão é servidor a servidor). */
+function buscarBlocosDoDia(data) {
+    return new Promise((resolve, reject) => {
+        const req = https.get(`${AGENDA_TECNICOS_URL}/api/agenda-tecnicos/almocos?data=${encodeURIComponent(data)}`,
+            { rejectUnauthorized: false, timeout: 8000 }, (res) => {
+                let corpo = "";
+                res.setEncoding("utf8");
+                res.on("data", (c) => { corpo += c; if (corpo.length > 2_000_000) req.destroy(new Error("resposta grande demais")); });
+                res.on("end", () => {
+                    try { resolve(res.statusCode === 200 ? JSON.parse(corpo).almocos || [] : []); } catch (e) { reject(e); }
+                });
+            });
+        req.on("timeout", () => req.destroy(new Error("tempo esgotado")));
+        req.on("error", reject);
+    });
 }
 
 export function resumirAgenda(ordens = [], { data = dataHojeSaoPaulo(), atualizadoEm = new Date() } = {}) {
@@ -82,6 +117,7 @@ let estado = {
     conectado: false,
     erro: null,
     resumo: null,
+    observacoes: [],
     verificadoEm: null,
 };
 
@@ -91,6 +127,7 @@ export function obterResumoAgendaTecnicos() {
         erro: estado.erro,
         verificadoEm: estado.verificadoEm,
         ...(estado.resumo || { data: dataHojeSaoPaulo(), atualizadoEm: null, totais: null, tecnicos: [] }),
+        observacoes: estado.observacoes || [],
     };
 }
 
@@ -112,8 +149,17 @@ export function iniciarAgendaTecnicosResumo(io) {
         io.emit(EVENTO_RESUMO, resumo);
     };
 
+    const atualizarObservacoes = async () => {
+        try {
+            estado = { ...estado, observacoes: observacoesDoDia(await buscarBlocosDoDia(dataHojeSaoPaulo())) };
+            publicar();
+        } catch (e) {
+            console.error("Agenda técnicos: não consegui ler os recados do dia:", e?.message);
+        }
+    };
     const pedirAgenda = () => {
         if (socket.connected) socket.emit("filtrarData", dataHojeSaoPaulo());
+        void atualizarObservacoes();
     };
 
     const aoReceberAgenda = (ordens) => {
@@ -138,6 +184,11 @@ export function iniciarAgendaTecnicosResumo(io) {
     socket.on("connect_error", (err) => {
         estado = { ...estado, conectado: false, erro: "Agenda de técnicos indisponível." };
         console.error("Agenda técnicos: falha ao conectar:", err.message);
+        publicar();
+    });
+    socket.on("agendaTecnicosAlmocosUpdate", (payload = {}) => {
+        if (payload.data !== dataHojeSaoPaulo()) return;
+        estado = { ...estado, observacoes: observacoesDoDia(payload.almocos) };
         publicar();
     });
     socket.on("agenda", aoReceberAgenda);
