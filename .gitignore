@@ -54,3 +54,6 @@ frontend/src/motions/*.mp4
 
 # Copias de seguranca de dependencias (grandes, nao versionar)
 node_modules.bak*/
+
+# Nunca versionar: runner/credencial de automação local
+.sync-agent/
