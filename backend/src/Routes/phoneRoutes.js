@@ -46,6 +46,17 @@ router.get("/credenciais", async (req, res) => {
   } catch (e) { falha(res, e, "Não foi possível obter as credenciais do telefone."); }
 });
 
+// Presença: o app avisa a cada ~30 s que o telefone está registrado. Fica só na memória (volta sozinha em 30 s após reiniciar).
+export const presenca = new Map();
+const PRESENCA_VALIDA_MS = 90_000;
+const limitePresenca = criarLimitador({ max: 240 });
+router.post("/presenca", (req, res) => {
+  if (!limitePresenca(`${req.user.empresa_id}:${req.user.id}`).ok) return res.status(429).json({ error: "Muitos avisos seguidos." });
+  const registro = ["registrado", "registrando", "recusado", "falhou", "desconectado"].includes(req.body?.registro) ? req.body.registro : "desconectado";
+  presenca.set(`${req.user.empresa_id}:${req.user.id}`, { em: Date.now(), registro, emChamada: req.body?.emChamada === true, naoPerturbe: req.body?.naoPerturbe === true });
+  res.json({ ok: true });
+});
+
 router.get("/diretorio", async (req, res) => {
   try {
     await garantirSchemaPhone();
@@ -92,7 +103,11 @@ export function criarPhoneAdminRoutes({ requireAdmin }) {
          WHERE p.empresa_id = ? AND u.deletado_em IS NULL ORDER BY u.nome ASC`, [empresa(req)]);
       const [pessoas] = await db.query(
         "SELECT id, nome FROM usuarios WHERE empresa_id = ? AND deletado_em IS NULL ORDER BY nome ASC LIMIT 2000", [empresa(req)]);
-      res.json({ configurada: telefoniaConfigurada(), contas: contas.map((c) => ({ ...publica(c), nome: c.usuario_nome })), pessoas });
+      res.json({ configurada: telefoniaConfigurada(), contas: contas.map((c) => {
+        const p = presenca.get(`${empresa(req)}:${c.usuario_id}`);
+        const vivo = !!p && Date.now() - p.em < PRESENCA_VALIDA_MS;
+        return { ...publica(c), nome: c.usuario_nome, online: vivo && p.registro === "registrado" && c.ativo === 1, emChamada: vivo && p.emChamada, naoPerturbe: vivo && p.naoPerturbe, visto: vivo ? new Date(p.em).toISOString() : null };
+      }), pessoas });
     } catch (e) { falha(res, e, "Não foi possível carregar o telefone."); }
   });
 
